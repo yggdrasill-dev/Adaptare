@@ -48,14 +48,14 @@ internal class SessionReplyRegistration : ISubscribeRegistration
 			out var context)
 			? NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
 				Subject,
-				ActivityKind.Server,
+				ActivityKind.Consumer,
 				context,
 				tags: new[]
 				{
 					new KeyValuePair<string, object?>("mq", "NATS")
 				})
 			: NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
-				ActivityKind.Server,
+				ActivityKind.Consumer,
 				name: Subject,
 				tags: new[]
 				{

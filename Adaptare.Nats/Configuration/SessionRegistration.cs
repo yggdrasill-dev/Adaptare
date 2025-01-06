@@ -93,7 +93,7 @@ internal class SessionRegistration<TMessage, TMessageSession> : ISubscribeRegist
 			out var context)
 			? NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
 				Subject,
-				ActivityKind.Server,
+				ActivityKind.Consumer,
 				context,
 				tags: new[]
 				{
@@ -101,7 +101,7 @@ internal class SessionRegistration<TMessage, TMessageSession> : ISubscribeRegist
 					new KeyValuePair<string, object?>("handler", typeof(TMessageSession).Name)
 				})
 			: NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
-				ActivityKind.Server,
+				ActivityKind.Consumer,
 				name: Subject,
 				tags: new[]
 				{

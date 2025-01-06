@@ -1,4 +1,5 @@
-﻿using Adaptare.Nats.Configuration;
+﻿using System.Diagnostics;
+using Adaptare.Nats.Configuration;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using NATS.Client.JetStream;
@@ -34,7 +35,9 @@ internal class JetStreamMessageSender : IMessageSender
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken = default)
 	{
-		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity($"Nats JetStream Publish");
+		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
+			$"Nats JetStream Publish",
+			ActivityKind.Producer);
 
 		var appendHeaders = new List<MessageHeaderValue>(header);
 

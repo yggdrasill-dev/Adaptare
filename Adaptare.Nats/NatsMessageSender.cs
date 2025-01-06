@@ -1,4 +1,5 @@
-﻿using Adaptare.Nats.Configuration;
+﻿using System.Diagnostics;
+using Adaptare.Nats.Configuration;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
@@ -32,7 +33,9 @@ internal class NatsMessageSender : IMessageSender
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken)
 	{
-		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity($"Nats Ask");
+		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
+			$"Nats Ask",
+			ActivityKind.Producer);
 
 		var appendHeaders = new List<MessageHeaderValue>(header);
 
@@ -100,7 +103,9 @@ internal class NatsMessageSender : IMessageSender
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken)
 	{
-		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity($"Nats Publish");
+		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
+			$"Nats Publish",
+			ActivityKind.Producer);
 
 		var appendHeaders = new List<MessageHeaderValue>(header);
 
@@ -135,7 +140,9 @@ internal class NatsMessageSender : IMessageSender
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken)
 	{
-		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity($"Nats Request");
+		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
+			$"Nats Request",
+			ActivityKind.Producer);
 
 		var answer = await AskAsync<TMessage, TReply>(
 			subject,
@@ -157,7 +164,9 @@ internal class NatsMessageSender : IMessageSender
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken)
 	{
-		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity($"Nats Send");
+		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
+			$"Nats Send",
+			ActivityKind.Producer);
 
 		var answer = await AskAsync<TMessage, ReadOnlyMemory<byte>>(
 			subject,
@@ -177,9 +186,11 @@ internal class NatsMessageSender : IMessageSender
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken)
 	{
-		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity($"Nats Internal Ask");
+		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
+			$"Nats Internal Ask",
+			ActivityKind.Producer);
 
-		m_Logger.LogInformation("Internal Ask: {subject}", subject);
+		m_Logger.LogDebug("Internal Ask: {subject}", subject);
 		var (id, promise) = m_ReplyPromiseStore.CreatePromise<TReply>(cancellationToken);
 
 		var appendHeaders = new List<MessageHeaderValue>();

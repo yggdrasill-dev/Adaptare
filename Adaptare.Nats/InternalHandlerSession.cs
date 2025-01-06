@@ -1,4 +1,5 @@
-﻿using Adaptare.Nats.Configuration;
+﻿using System.Diagnostics;
+using Adaptare.Nats.Configuration;
 
 namespace Adaptare.Nats;
 
@@ -14,7 +15,9 @@ internal class InternalHandlerSession<TMessage, THandler> : IMessageSession<TMes
 
 	public async ValueTask HandleAsync(Question<TMessage> question, CancellationToken cancellationToken = default)
 	{
-		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity("InternalHandlerSession");
+		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
+			"InternalHandlerSession",
+			ActivityKind.Consumer);
 
 		_ = (activity?.AddTag("mq", "NATS")
 			.AddTag("handler", typeof(THandler).Name));
