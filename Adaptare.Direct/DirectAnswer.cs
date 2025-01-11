@@ -1,4 +1,6 @@
-﻿namespace Adaptare.Direct;
+﻿using System.Diagnostics;
+
+namespace Adaptare.Direct;
 public record DirectAnswer<TAnswer> : Answer<TAnswer>
 {
 	private readonly TaskCompletionSource<object> m_TaskCompletionSource = new();
@@ -19,7 +21,7 @@ public record DirectAnswer<TAnswer> : Answer<TAnswer>
 		if (!CanResponse)
 			throw new MessageCannotResponseException();
 
-		using var activity = DirectDiagnostics.ActivitySource.StartActivity($"Answer Ask");
+		using var activity = DirectDiagnostics.ActivitySource.StartActivity($"Answer Ask", ActivityKind.Server);
 
 		_ = (activity?.AddTag("mq", "Direct")
 			.AddTag("handler", typeof(DirectAnswer<TAnswer>).Name));
@@ -39,7 +41,7 @@ public record DirectAnswer<TAnswer> : Answer<TAnswer>
 		if (!CanResponse)
 			throw new MessageCannotResponseException();
 
-		using var activity = DirectDiagnostics.ActivitySource.StartActivity($"Complete Answer");
+		using var activity = DirectDiagnostics.ActivitySource.StartActivity($"Complete Answer", ActivityKind.Server);
 
 		_ = (activity?.AddTag("mq", "Direct")
 			.AddTag("handler", typeof(DirectAnswer<TAnswer>).Name));
@@ -56,7 +58,7 @@ public record DirectAnswer<TAnswer> : Answer<TAnswer>
 		if (!CanResponse)
 			throw new MessageCannotResponseException();
 
-		using var activity = DirectDiagnostics.ActivitySource.StartActivity($"Complete Answer");
+		using var activity = DirectDiagnostics.ActivitySource.StartActivity($"Complete Answer", ActivityKind.Server);
 
 		_ = (activity?.AddTag("mq", "Direct")
 			.AddTag("handler", typeof(DirectAnswer<TAnswer>).Name));
@@ -74,7 +76,7 @@ public record DirectAnswer<TAnswer> : Answer<TAnswer>
 		if (!CanResponse)
 			throw new MessageCannotResponseException();
 
-		using var activity = DirectDiagnostics.ActivitySource.StartActivity($"Fail");
+		using var activity = DirectDiagnostics.ActivitySource.StartActivity($"Fail", ActivityKind.Server);
 
 		_ = (activity?.AddTag("mq", "Direct")
 			.AddTag("handler", typeof(DirectAnswer<TAnswer>).Name));

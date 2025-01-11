@@ -65,7 +65,7 @@ internal class SubscribeRegistration<TMessage, THandler> : ISubscribeRegistratio
 			out var context)
 			? RabbitMQConnectionManager._RabbitMQActivitySource.StartActivity(
 				Subject,
-				ActivityKind.Server,
+				ActivityKind.Consumer,
 				context,
 				tags: new[]
 				{
@@ -73,7 +73,7 @@ internal class SubscribeRegistration<TMessage, THandler> : ISubscribeRegistratio
 					new KeyValuePair<string, object?>("handler", typeof(THandler).Name)
 				})
 			: RabbitMQConnectionManager._RabbitMQActivitySource.StartActivity(
-				ActivityKind.Server,
+				ActivityKind.Consumer,
 				name: Subject,
 				tags: new[]
 				{

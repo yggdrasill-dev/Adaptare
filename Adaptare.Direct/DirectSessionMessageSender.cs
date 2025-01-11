@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
 
 namespace Adaptare.Direct;
 
@@ -22,8 +23,9 @@ internal class DirectSessionMessageSender<TQuestion, TMessageSession> : IMessage
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken = default)
 	{
-		using var activity = DirectDiagnostics.ActivitySource.StartActivity($"Direct Ask");
-		using var questionActivity = DirectDiagnostics.ActivitySource.StartActivity(subject);
+		using var questionActivity = DirectDiagnostics.ActivitySource.StartActivity(
+			subject,
+			ActivityKind.Producer);
 
 		_ = (questionActivity?.AddTag("mq", "Direct")
 			.AddTag("handler", typeof(TMessageSession).Name));

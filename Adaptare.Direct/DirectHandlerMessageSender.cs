@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace Adaptare.Direct;
 
@@ -33,7 +34,7 @@ internal class DirectHandlerMessageSender<TData, TMessageHandler> : IMessageSend
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken = default)
 	{
-		using var activity = DirectDiagnostics.ActivitySource.StartActivity($"Direct Publish");
+		using var activity = DirectDiagnostics.ActivitySource.StartActivity($"Direct Publish", ActivityKind.Producer);
 
 		_ = HandleMessageAsync(
 			subject,
@@ -75,7 +76,7 @@ internal class DirectHandlerMessageSender<TData, TMessageHandler> : IMessageSend
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken = default)
 	{
-		using var activity = DirectDiagnostics.ActivitySource.StartActivity($"Direct Publish");
+		using var activity = DirectDiagnostics.ActivitySource.StartActivity($"Direct Publish", ActivityKind.Producer);
 
 		await HandleMessageAsync(
 			subject,
@@ -90,7 +91,7 @@ internal class DirectHandlerMessageSender<TData, TMessageHandler> : IMessageSend
 		IEnumerable<MessageHeaderValue>? headerValues,
 		CancellationToken cancellationToken)
 	{
-		using var activity = DirectDiagnostics.ActivitySource.StartActivity(subject);
+		using var activity = DirectDiagnostics.ActivitySource.StartActivity(subject, ActivityKind.Producer);
 
 		_ = (activity?.AddTag("mq", "Direct")
 			.AddTag("handler", typeof(TMessageHandler).Name));

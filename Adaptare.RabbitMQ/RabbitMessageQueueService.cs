@@ -1,4 +1,5 @@
 ﻿using RabbitMQ.Client;
+using System.Diagnostics;
 
 namespace Adaptare.RabbitMQ;
 
@@ -31,7 +32,9 @@ internal class RabbitMessageQueueService : IMessageQueueService
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken)
 	{
-		using var activity = RabbitMQConnectionManager._RabbitMQActivitySource.StartActivity("RabbitMQ Publish");
+		using var activity = RabbitMQConnectionManager._RabbitMQActivitySource.StartActivity(
+			"RabbitMQ Publish",
+			ActivityKind.Producer);
 
 		var appendHeaders = new List<MessageHeaderValue>(header);
 

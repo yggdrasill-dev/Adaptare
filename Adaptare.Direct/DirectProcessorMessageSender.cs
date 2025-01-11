@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
 
 namespace Adaptare.Direct;
 
@@ -36,9 +37,9 @@ internal class DirectProcessorMessageSender<TData, TResult, TMessageProcessor> :
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken = default)
 	{
-		using var requestActivity = DirectDiagnostics.ActivitySource.StartActivity($"Direct Request");
-
-		using var activity = DirectDiagnostics.ActivitySource.StartActivity(subject);
+		using var activity = DirectDiagnostics.ActivitySource.StartActivity(
+			subject,
+			ActivityKind.Producer);
 
 		_ = (activity?.AddTag("mq", "Direct")
 			.AddTag("handler", typeof(TMessageProcessor).Name));
