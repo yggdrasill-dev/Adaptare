@@ -22,19 +22,6 @@ public static class ServiceCollectitonExtensions
 			.AddSingleton<IMessageQueueServiceFactory, NoopMessageQueueServiceFactory>();
 	}
 
-	public static IServiceCollection AddRabbitMessageQueue(
-		this IServiceCollection services,
-		Action<RabbitMessageQueueConfiguration> configure)
-	{
-		var configuration = new RabbitMessageQueueConfiguration(services);
-
-		configure(configuration);
-
-		InitialRabbitMessageQueueConfiguration(configuration);
-
-		return services;
-	}
-
 	public static MessageQueueConfiguration AddRabbitMessageQueue(
 		this MessageQueueConfiguration configuration,
 		Action<RabbitMessageQueueConfiguration> configure)

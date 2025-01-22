@@ -10,15 +10,6 @@ public class RabbitMessageQueueConfiguration
 
 	private readonly List<ISubscribeRegistration> m_SubscribeRegistrations = new();
 
-	public RabbitMessageQueueConfiguration(IServiceCollection services)
-	{
-		Services = services ?? throw new ArgumentNullException(nameof(services));
-
-		_ = services.AddMessageQueue();
-
-		_ = Services.AddSingleton<IEnumerable<ISubscribeRegistration>>(m_SubscribeRegistrations);
-	}
-
 	public RabbitMessageQueueConfiguration(MessageQueueConfiguration coreConfiguration)
 	{
 		ArgumentNullException.ThrowIfNull(coreConfiguration, nameof(coreConfiguration));
