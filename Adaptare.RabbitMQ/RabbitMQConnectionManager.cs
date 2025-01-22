@@ -9,7 +9,7 @@ namespace Adaptare.RabbitMQ;
 
 internal class RabbitMQConnectionManager : IDisposable, IAsyncDisposable, IMessageReceiver<RabbitSubscriptionSettings>
 {
-	internal static readonly ActivitySource _RabbitMQActivitySource = new("Valhalla.MessageQueue.RabbitMQ");
+	internal static readonly ActivitySource _RabbitMQActivitySource = new("Adaptare.MessageQueue.RabbitMQ");
 
 	private readonly ILogger<RabbitMQConnectionManager> m_Logger;
 	private readonly RabbitMQOptions m_Options;

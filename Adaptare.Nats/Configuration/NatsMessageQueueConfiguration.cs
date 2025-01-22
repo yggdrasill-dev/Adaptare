@@ -8,7 +8,7 @@ namespace Adaptare.Nats.Configuration;
 
 public class NatsMessageQueueConfiguration
 {
-	internal static ActivitySource _NatsActivitySource = new("Valhalla.MessageQueue.Nats");
+	internal static ActivitySource _NatsActivitySource = new("Adaptare.MessageQueue.Nats");
 
 	private readonly MessageQueueConfiguration m_CoreConfiguration;
 	private readonly List<StreamConfig> m_StreamRegistrations = new();

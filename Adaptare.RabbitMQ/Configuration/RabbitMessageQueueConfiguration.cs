@@ -6,7 +6,7 @@ namespace Adaptare.RabbitMQ.Configuration;
 
 public class RabbitMessageQueueConfiguration
 {
-	internal static ActivitySource _RabbitActivitySource = new("Valhalla.MessageQueue.RabbitMQ");
+	internal static ActivitySource _RabbitActivitySource = new("Adaptare.MessageQueue.RabbitMQ");
 
 	private readonly List<ISubscribeRegistration> m_SubscribeRegistrations = new();
 

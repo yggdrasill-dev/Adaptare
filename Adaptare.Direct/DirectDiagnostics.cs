@@ -4,5 +4,5 @@ namespace Adaptare.Direct;
 
 internal class DirectDiagnostics
 {
-	public static ActivitySource ActivitySource = new("Valhalla.MessageQueue.Direct");
+	public static ActivitySource ActivitySource = new("Adaptare.MessageQueue.Direct");
 }

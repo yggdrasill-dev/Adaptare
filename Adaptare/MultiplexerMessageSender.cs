@@ -4,7 +4,7 @@ namespace Adaptare;
 
 internal class MultiplexerMessageSender : IMessageSender, IMessageExchange
 {
-	private static readonly ActivitySource _SenderActivitySource = new($"Valhalla.MessageQueue.{nameof(MultiplexerMessageSender)}");
+	private static readonly ActivitySource _SenderActivitySource = new($"Adaptare.MessageQueue.{nameof(MultiplexerMessageSender)}");
 
 	private readonly IMessageExchange[] m_Exchanges = Array.Empty<IMessageExchange>();
 	private readonly IServiceProvider m_ServiceProvider;
