@@ -6,21 +6,14 @@ using NATS.Client.JetStream;
 
 namespace Adaptare.Nats;
 
-internal class JetStreamMessageSender : IMessageSender
+internal class JetStreamMessageSender(
+	INatsSerializerRegistry? natsSerializerRegistry,
+	INatsJSContext natsJSContext,
+	ILogger<JetStreamMessageSender> logger) 
+	: IMessageSender
 {
-	private readonly INatsSerializerRegistry? m_NatsSerializerRegistry;
-	private readonly INatsJSContext m_NatsJSContext;
-	private readonly ILogger<JetStreamMessageSender> m_Logger;
-
-	public JetStreamMessageSender(
-		INatsSerializerRegistry? natsSerializerRegistry,
-		INatsJSContext natsJSContext,
-		ILogger<JetStreamMessageSender> logger)
-	{
-		m_NatsSerializerRegistry = natsSerializerRegistry;
-		m_NatsJSContext = natsJSContext ?? throw new ArgumentNullException(nameof(natsJSContext));
-		m_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly INatsJSContext m_NatsJSContext = natsJSContext ?? throw new ArgumentNullException(nameof(natsJSContext));
+	private readonly ILogger<JetStreamMessageSender> m_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 	public ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
 		string subject,
@@ -50,7 +43,7 @@ internal class JetStreamMessageSender : IMessageSender
 					headers.Add(new MessageHeaderValue(key, value));
 			});
 
-		var ack = m_NatsSerializerRegistry is null
+		var ack = natsSerializerRegistry is null
 			? await m_NatsJSContext.PublishAsync(
 				subject,
 				data,
@@ -60,7 +53,7 @@ internal class JetStreamMessageSender : IMessageSender
 				subject,
 				data,
 				headers: MakeMsgHeader(appendHeaders),
-				serializer: m_NatsSerializerRegistry.GetSerializer<TMessage>(),
+				serializer: natsSerializerRegistry.GetSerializer<TMessage>(),
 				cancellationToken: cancellationToken).ConfigureAwait(false);
 
 		ack.EnsureSuccess();

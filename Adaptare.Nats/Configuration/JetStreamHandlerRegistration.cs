@@ -64,19 +64,17 @@ internal class JetStreamHandlerRegistration<TMessage, THandler> : ISubscribeRegi
 				Subject,
 				ActivityKind.Server,
 				context,
-				tags: new[]
-				{
+				tags: [
 					new KeyValuePair<string, object?>("mq", "NATS"),
 					new KeyValuePair<string, object?>("handler", typeof(THandler).Name)
-				})
+				])
 			: NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
 				ActivityKind.Server,
 				name: Subject,
-				tags: new[]
-				{
+				tags: [
 					new KeyValuePair<string, object?>("mq", "NATS"),
 					new KeyValuePair<string, object?>("handler", typeof(THandler).Name)
-				});
+				]);
 
 		try
 		{

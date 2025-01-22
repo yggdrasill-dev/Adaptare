@@ -4,46 +4,31 @@ using Microsoft.Extensions.Logging;
 
 namespace Adaptare.RabbitMQ;
 
-internal class MessageQueueBackground : BackgroundService
+internal class MessageQueueBackground(
+	IMessageReceiver<RabbitSubscriptionSettings> messageReceiver,
+	IServiceProvider serviceProvider,
+	IEnumerable<ISubscribeRegistration> subscribes,
+	RabbitMQConnectionManager rabbitMQConnectionManager,
+	ILogger<MessageQueueBackground> logger) : BackgroundService
 {
-	private readonly IMessageReceiver<RabbitSubscriptionSettings> m_MessageReceiver;
-	private readonly IServiceProvider m_ServiceProvider;
-	private readonly IEnumerable<ISubscribeRegistration> m_Subscribes;
-	private readonly RabbitMQConnectionManager m_RabbitMQConnectionManager;
-	private readonly ILogger<MessageQueueBackground> m_Logger;
-
-	public MessageQueueBackground(
-		IMessageReceiver<RabbitSubscriptionSettings> messageReceiver,
-		IServiceProvider serviceProvider,
-		IEnumerable<ISubscribeRegistration> subscribes,
-		RabbitMQConnectionManager rabbitMQConnectionManager,
-		ILogger<MessageQueueBackground> logger)
-	{
-		m_MessageReceiver = messageReceiver;
-		m_ServiceProvider = serviceProvider;
-		m_Subscribes = subscribes;
-		m_RabbitMQConnectionManager = rabbitMQConnectionManager;
-		m_Logger = logger;
-	}
-
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
-		await m_RabbitMQConnectionManager.StartAsync(
+		await rabbitMQConnectionManager.StartAsync(
 			stoppingToken).ConfigureAwait(false);
 
 		var subscriptions = new List<IDisposable>();
 
-		foreach (var registration in m_Subscribes)
+		foreach (var registration in subscribes)
 			subscriptions.Add(
 				await registration.SubscribeAsync(
-					m_MessageReceiver,
-					m_ServiceProvider,
-					m_Logger,
+					messageReceiver,
+					serviceProvider,
+					logger,
 					stoppingToken).ConfigureAwait(false));
 
 		_ = stoppingToken.Register(() =>
 		{
-			m_RabbitMQConnectionManager.StopAsync().Wait();
+			rabbitMQConnectionManager.StopAsync().Wait();
 
 			foreach (var sub in subscriptions)
 				sub.Dispose();

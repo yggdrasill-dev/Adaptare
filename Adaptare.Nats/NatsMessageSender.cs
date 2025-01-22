@@ -5,27 +5,16 @@ using NATS.Client.Core;
 
 namespace Adaptare.Nats;
 
-internal class NatsMessageSender : IMessageSender
+internal class NatsMessageSender(
+	INatsSerializerRegistry? natsSerializerRegistry,
+	string? sessionReplySubject,
+	INatsConnection connection,
+	IReplyPromiseStore replyPromiseStore,
+	ILogger<NatsMessageSender> logger) : IMessageSender
 {
-	private readonly INatsSerializerRegistry? m_NatsSerializerRegistry;
-	private readonly string? m_SessionReplySubject;
-	private readonly IReplyPromiseStore m_ReplyPromiseStore;
-	private readonly ILogger<NatsMessageSender> m_Logger;
-	private readonly INatsConnection m_Connection;
-
-	public NatsMessageSender(
-		INatsSerializerRegistry? natsSerializerRegistry,
-		string? sessionReplySubject,
-		INatsConnection connection,
-		IReplyPromiseStore replyPromiseStore,
-		ILogger<NatsMessageSender> logger)
-	{
-		m_NatsSerializerRegistry = natsSerializerRegistry;
-		m_SessionReplySubject = sessionReplySubject;
-		m_ReplyPromiseStore = replyPromiseStore ?? throw new ArgumentNullException(nameof(replyPromiseStore));
-		m_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-		m_Connection = connection ?? throw new ArgumentNullException(nameof(connection));
-	}
+	private readonly IReplyPromiseStore m_ReplyPromiseStore = replyPromiseStore ?? throw new ArgumentNullException(nameof(replyPromiseStore));
+	private readonly ILogger<NatsMessageSender> m_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	private readonly INatsConnection m_Connection = connection ?? throw new ArgumentNullException(nameof(connection));
 
 	public async ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
 		string subject,
@@ -59,11 +48,11 @@ internal class NatsMessageSender : IMessageSender
 
 		var headers = MakeMsgHeader(appendHeaders);
 
-		if (!string.IsNullOrEmpty(m_SessionReplySubject))
-			headers.Add(MessageHeaderValueConsts.SessionReplySubjectKey, m_SessionReplySubject);
+		if (!string.IsNullOrEmpty(sessionReplySubject))
+			headers.Add(MessageHeaderValueConsts.SessionReplySubjectKey, sessionReplySubject);
 
 		cancellationToken.ThrowIfCancellationRequested();
-		var reply = m_NatsSerializerRegistry is null
+		var reply = natsSerializerRegistry is null
 			? await m_Connection.RequestAsync<TMessage, TReply>(
 				subject,
 				data,
@@ -73,8 +62,8 @@ internal class NatsMessageSender : IMessageSender
 				subject,
 				data,
 				headers,
-				requestSerializer: m_NatsSerializerRegistry.GetSerializer<TMessage>(),
-				replySerializer: m_NatsSerializerRegistry.GetDeserializer<TReply>(),
+				requestSerializer: natsSerializerRegistry.GetSerializer<TMessage>(),
+				replySerializer: natsSerializerRegistry.GetDeserializer<TReply>(),
 				cancellationToken: cancellationToken).ConfigureAwait(false);
 
 		if (reply.Headers?.TryGetValue(MessageHeaderValueConsts.FailHeaderKey, out var values) == true)
@@ -126,11 +115,11 @@ internal class NatsMessageSender : IMessageSender
 		};
 
 		cancellationToken.ThrowIfCancellationRequested();
-		return m_NatsSerializerRegistry is null
+		return natsSerializerRegistry is null
 			? m_Connection.PublishAsync(msg, cancellationToken: cancellationToken)
 			: m_Connection.PublishAsync(
 				msg,
-				serializer: m_NatsSerializerRegistry.GetSerializer<TMessage>(),
+				serializer: natsSerializerRegistry.GetSerializer<TMessage>(),
 				cancellationToken: cancellationToken);
 	}
 
@@ -195,8 +184,8 @@ internal class NatsMessageSender : IMessageSender
 
 		var appendHeaders = new List<MessageHeaderValue>();
 
-		if (!string.IsNullOrEmpty(m_SessionReplySubject))
-			appendHeaders.Add(new MessageHeaderValue(MessageHeaderValueConsts.SessionReplySubjectKey, m_SessionReplySubject));
+		if (!string.IsNullOrEmpty(sessionReplySubject))
+			appendHeaders.Add(new MessageHeaderValue(MessageHeaderValueConsts.SessionReplySubjectKey, sessionReplySubject));
 
 		appendHeaders.Add(new MessageHeaderValue(MessageHeaderValueConsts.SessionAskKey, id.ToString()));
 

@@ -1,13 +1,8 @@
 ﻿namespace Adaptare.Nats;
 
-internal class CancellationTokenDisposable : IDisposable
+internal class CancellationTokenDisposable(CancellationToken token = default) : IDisposable
 {
-	private readonly CancellationTokenSource m_Cts;
-
-	public CancellationTokenDisposable(CancellationToken token = default)
-	{
-		m_Cts = CancellationTokenSource.CreateLinkedTokenSource(token);
-	}
+	private readonly CancellationTokenSource m_Cts = CancellationTokenSource.CreateLinkedTokenSource(token);
 
 	public CancellationToken Token => m_Cts.Token;
 

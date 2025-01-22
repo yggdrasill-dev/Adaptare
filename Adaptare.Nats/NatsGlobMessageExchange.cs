@@ -4,18 +4,9 @@ using NATS.Client.Core;
 
 namespace Adaptare.Nats;
 
-internal class NatsGlobMessageExchange : IMessageExchange
+internal class NatsGlobMessageExchange(string pattern, string? sessionReplySubject, INatsSerializerRegistry? natsSerializerRegistry) : IMessageExchange
 {
-	private readonly Glob m_Glob;
-	private readonly string? m_SessionReplySubject;
-	private readonly INatsSerializerRegistry? m_NatsSerializerRegistry;
-
-	public NatsGlobMessageExchange(string pattern, string? sessionReplySubject, INatsSerializerRegistry? natsSerializerRegistry)
-	{
-		m_Glob = Glob.Parse(pattern);
-		m_SessionReplySubject = sessionReplySubject;
-		m_NatsSerializerRegistry = natsSerializerRegistry;
-	}
+	private readonly Glob m_Glob = Glob.Parse(pattern);
 
 	public IMessageSender GetMessageSender(string subject, IServiceProvider serviceProvider)
 	{
@@ -23,8 +14,8 @@ internal class NatsGlobMessageExchange : IMessageExchange
 
 		return connectionMgr.CreateMessageSender(
 			serviceProvider,
-			m_NatsSerializerRegistry,
-			m_SessionReplySubject);
+			natsSerializerRegistry,
+			sessionReplySubject);
 	}
 
 	public bool Match(string subject, IEnumerable<MessageHeaderValue> header)

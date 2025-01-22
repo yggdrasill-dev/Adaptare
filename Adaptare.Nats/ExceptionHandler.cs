@@ -2,18 +2,13 @@
 
 namespace Adaptare.Nats;
 
-internal class ExceptionHandler
+internal class ExceptionHandler(
+	Func<Exception, CancellationToken, Task> handleException,
+	ILogger<ExceptionHandler> logger)
 {
-	private readonly Func<Exception, CancellationToken, Task> m_HandleException;
-	private readonly ILogger<ExceptionHandler> m_Logger;
-
-	public ExceptionHandler(
-		Func<Exception, CancellationToken, Task> handleException,
-		ILogger<ExceptionHandler> logger)
-	{
-		m_HandleException = handleException ?? throw new ArgumentNullException(nameof(handleException));
-		m_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly Func<Exception, CancellationToken, Task> m_HandleException = handleException
+		?? throw new ArgumentNullException(nameof(handleException));
+	private readonly ILogger<ExceptionHandler> m_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 	public Task HandleExceptionAsync(Exception ex, CancellationToken cancellationToken = default)
 	{

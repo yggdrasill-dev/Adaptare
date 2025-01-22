@@ -7,26 +7,19 @@ using RabbitMQ.Client.Events;
 
 namespace Adaptare.RabbitMQ;
 
-internal class RabbitMQConnectionManager : IDisposable, IAsyncDisposable, IMessageReceiver<RabbitSubscriptionSettings>
+internal class RabbitMQConnectionManager(
+	IServiceProvider serviceProvider,
+	IOptions<RabbitMQOptions> optionsAccessor,
+	ILogger<RabbitMQConnectionManager> logger) : IDisposable, IAsyncDisposable, IMessageReceiver<RabbitSubscriptionSettings>
 {
 	internal static readonly ActivitySource _RabbitMQActivitySource = new("Adaptare.MessageQueue.RabbitMQ");
 
-	private readonly ILogger<RabbitMQConnectionManager> m_Logger;
-	private readonly RabbitMQOptions m_Options;
-	private readonly IServiceProvider m_ServiceProvider;
+	private readonly ILogger<RabbitMQConnectionManager> m_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	private readonly RabbitMQOptions m_Options = optionsAccessor.Value;
+	private readonly IServiceProvider m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 	private IConnection? m_Connection;
 	private bool m_DisposedValue;
 	private IChannel? m_DeclareChannel;
-
-	public RabbitMQConnectionManager(
-		IServiceProvider serviceProvider,
-		IOptions<RabbitMQOptions> optionsAccessor,
-		ILogger<RabbitMQConnectionManager> logger)
-	{
-		m_Options = optionsAccessor.Value;
-		m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-		m_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
 
 	public IChannel SenderChannel { get; private set; } = default!;
 

@@ -1,18 +1,11 @@
 ﻿using System.Buffers;
 using System.Runtime.CompilerServices;
-using Adaptare.RabbitMQ;
 
 namespace Adaptare.RabbitMQ;
 
-public class RabbitMQRawDeserializer<T> : IRabbitMQDeserializer<T>
+public class RabbitMQRawDeserializer<T>(IRabbitMQDeserializer<T>? next) : IRabbitMQDeserializer<T>
 {
 	public static readonly RabbitMQRawDeserializer<T> Default = new(null);
-	private readonly IRabbitMQDeserializer<T>? m_Next;
-
-	public RabbitMQRawDeserializer(IRabbitMQDeserializer<T>? next)
-	{
-		m_Next = next;
-	}
 
 	public T? Deserialize(in ReadOnlySequence<byte> buffer)
 	{
@@ -23,9 +16,9 @@ public class RabbitMQRawDeserializer<T> : IRabbitMQDeserializer<T>
 
 		return RabbitMQRawDeserializer<T>.TryDeserialize(span, out var result)
 			? result
-			: m_Next == null
+			: next == null
 				? throw new RabbitMQException($"Can't deserialize {typeof(T)}")
-				: m_Next.Deserialize(buffer);
+				: next.Deserialize(buffer);
 	}
 
 	private static bool TryDeserialize(in ReadOnlySpan<byte> span, out T result)

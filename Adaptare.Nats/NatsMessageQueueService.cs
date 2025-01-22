@@ -2,15 +2,10 @@
 
 namespace Adaptare.Nats;
 
-internal class NatsMessageQueueService : INatsMessageQueueService
+internal class NatsMessageQueueService(
+	INatsConnectionManager natsConnectionManager) : INatsMessageQueueService
 {
-	private readonly INatsConnectionManager m_NatsConnectionManager;
-
-	public NatsMessageQueueService(
-		INatsConnectionManager natsConnectionManager)
-	{
-		m_NatsConnectionManager = natsConnectionManager ?? throw new ArgumentNullException(nameof(natsConnectionManager));
-	}
+	private readonly INatsConnectionManager m_NatsConnectionManager = natsConnectionManager ?? throw new ArgumentNullException(nameof(natsConnectionManager));
 
 	public async ValueTask RegisterStreamAsync(StreamConfig config, CancellationToken cancellationToken = default)
 	{

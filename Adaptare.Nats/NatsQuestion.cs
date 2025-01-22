@@ -29,7 +29,7 @@ internal record NatsQuestion<TQuestion> : Question<TQuestion>
 			? m_MessageSender.AskAsync<TMessage, TReply>(
 				m_ReplySubject!,
 				data,
-				header.Concat(new[] { new MessageHeaderValue(MessageHeaderValueConsts.SessionAskKey, string.Empty) }),
+				header.Concat([new MessageHeaderValue(MessageHeaderValueConsts.SessionAskKey, string.Empty)]),
 				cancellationToken)
 			: throw new NatsReplySubjectNullException();
 	public override ValueTask CompleteAsync(IEnumerable<MessageHeaderValue> header, CancellationToken cancellationToken = default)

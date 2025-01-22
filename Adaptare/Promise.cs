@@ -1,13 +1,8 @@
 ﻿namespace Adaptare;
 
-class Promise<TPromiseReply> : IPromise
+class Promise<TPromiseReply>(TaskCompletionSource<Answer<TPromiseReply>> completionSource) : IPromise
 {
-	private readonly TaskCompletionSource<Answer<TPromiseReply>> m_CompletionSource;
-
-	public Promise(TaskCompletionSource<Answer<TPromiseReply>> completionSource)
-	{
-		m_CompletionSource = completionSource ?? throw new ArgumentNullException(nameof(completionSource));
-	}
+	private readonly TaskCompletionSource<Answer<TPromiseReply>> m_CompletionSource = completionSource ?? throw new ArgumentNullException(nameof(completionSource));
 
 	public void Cancel()
 		=> _ = m_CompletionSource.TrySetCanceled();

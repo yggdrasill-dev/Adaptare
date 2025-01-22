@@ -1,25 +1,19 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
 
 namespace Adaptare.Direct;
 
-internal class DirectHandlerMessageSender<TData, TMessageHandler> : IMessageSender
+internal class DirectHandlerMessageSender<TData, TMessageHandler>(
+	Func<IServiceProvider, TMessageHandler> messageHandlerFactory,
+	IServiceProvider serviceProvider,
+	ILogger<DirectHandlerMessageSender<TData, TMessageHandler>> logger)
+	: IMessageSender
 	where TMessageHandler : class, IMessageHandler<TData>
 {
-	private readonly ILogger<DirectHandlerMessageSender<TData, TMessageHandler>> m_Logger;
-	private readonly IServiceProvider m_ServiceProvider;
-	private readonly Func<IServiceProvider, TMessageHandler> m_MessageHandlerFactory;
-
-	public DirectHandlerMessageSender(
-		Func<IServiceProvider, TMessageHandler> messageHandlerFactory,
-		IServiceProvider serviceProvider,
-		ILogger<DirectHandlerMessageSender<TData, TMessageHandler>> logger)
-	{
-		m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-		m_MessageHandlerFactory = messageHandlerFactory ?? throw new ArgumentNullException(nameof(messageHandlerFactory));
-		m_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly ILogger<DirectHandlerMessageSender<TData, TMessageHandler>> m_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	private readonly IServiceProvider m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+	private readonly Func<IServiceProvider, TMessageHandler> m_MessageHandlerFactory = messageHandlerFactory ?? throw new ArgumentNullException(nameof(messageHandlerFactory));
 
 	public ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
 		string subject,

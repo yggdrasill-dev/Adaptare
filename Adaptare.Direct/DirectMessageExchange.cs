@@ -3,17 +3,13 @@ using DotNet.Globbing;
 
 namespace Adaptare.Direct;
 
-internal class DirectMessageExchange : IMessageExchange
+internal class DirectMessageExchange(
+	string pattern,
+	IEnumerable<ISubscribeRegistration> subscribeRegistrations)
+	: IMessageExchange
 {
-	private readonly Glob m_Glob;
-	private readonly IEnumerable<ISubscribeRegistration> m_SubscribeRegistrations;
-
-	public DirectMessageExchange(string pattern, IEnumerable<ISubscribeRegistration> subscribeRegistrations)
-	{
-		m_Glob = Glob.Parse(pattern);
-
-		m_SubscribeRegistrations = subscribeRegistrations ?? throw new ArgumentNullException(nameof(subscribeRegistrations));
-	}
+	private readonly Glob m_Glob = Glob.Parse(pattern);
+	private readonly IEnumerable<ISubscribeRegistration> m_SubscribeRegistrations = subscribeRegistrations ?? throw new ArgumentNullException(nameof(subscribeRegistrations));
 
 	public IMessageSender GetMessageSender(string subject, IServiceProvider serviceProvider)
 	{

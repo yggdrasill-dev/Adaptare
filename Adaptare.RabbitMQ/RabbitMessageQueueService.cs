@@ -1,24 +1,13 @@
-﻿using RabbitMQ.Client;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using RabbitMQ.Client;
 
 namespace Adaptare.RabbitMQ;
 
-internal class RabbitMessageQueueService : IMessageQueueService
+internal class RabbitMessageQueueService(
+	string exchangeName,
+	IChannel channel,
+	IRabbitMQSerializerRegistry serializerRegistry) : IMessageQueueService
 {
-	private readonly string m_ExchangeName;
-	private readonly IChannel m_Channel;
-	private readonly IRabbitMQSerializerRegistry m_SerializerRegistry;
-
-	public RabbitMessageQueueService(
-		string exchangeName,
-		IChannel channel,
-		IRabbitMQSerializerRegistry serializerRegistry)
-	{
-		m_ExchangeName = exchangeName;
-		m_Channel = channel;
-		m_SerializerRegistry = serializerRegistry;
-	}
-
 	public ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
 		string subject,
 		TMessage data,
@@ -51,9 +40,9 @@ internal class RabbitMessageQueueService : IMessageQueueService
 
 		cancellationToken.ThrowIfCancellationRequested();
 
-		var binaryData = m_SerializerRegistry.GetSerializer<TMessage>().Serialize(data);
-		await m_Channel.BasicPublishAsync(
-			m_ExchangeName,
+		var binaryData = serializerRegistry.GetSerializer<TMessage>().Serialize(data);
+		await channel.BasicPublishAsync(
+			exchangeName,
 			subject,
 			false,
 			properties,

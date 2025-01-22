@@ -3,17 +3,11 @@ using Microsoft.Extensions.Options;
 
 namespace Adaptare.Configuration;
 
-public class MessageQueueConfiguration
+public class MessageQueueConfiguration(IServiceCollection services)
 {
-	private readonly OptionsBuilder<MessageExchangeOptions> m_ExchangeOptionsBuilder;
+	private readonly OptionsBuilder<MessageExchangeOptions> m_ExchangeOptionsBuilder = services.AddOptions<MessageExchangeOptions>();
 
-	public MessageQueueConfiguration(IServiceCollection services)
-	{
-		Services = services ?? throw new ArgumentNullException(nameof(services));
-		m_ExchangeOptionsBuilder = services.AddOptions<MessageExchangeOptions>();
-	}
-
-	public IServiceCollection Services { get; }
+	public IServiceCollection Services { get; } = services ?? throw new ArgumentNullException(nameof(services));
 
 	public string? SessionReplySubject { get; private set; }
 

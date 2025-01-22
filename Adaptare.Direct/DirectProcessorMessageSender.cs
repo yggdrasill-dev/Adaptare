@@ -1,21 +1,16 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Adaptare.Direct;
 
-internal class DirectProcessorMessageSender<TData, TResult, TMessageProcessor> : IMessageSender
+internal class DirectProcessorMessageSender<TData, TResult, TMessageProcessor>(
+	Func<IServiceProvider, TMessageProcessor> processorFactory,
+	IServiceProvider serviceProvider)
+	: IMessageSender
 	where TMessageProcessor : class, IMessageProcessor<TData, TResult>
 {
-	private readonly Func<IServiceProvider, TMessageProcessor> m_ProcessorFactory;
-	private readonly IServiceProvider m_ServiceProvider;
-
-	public DirectProcessorMessageSender(
-		Func<IServiceProvider, TMessageProcessor> processorFactory,
-		IServiceProvider serviceProvider)
-	{
-		m_ProcessorFactory = processorFactory ?? throw new ArgumentNullException(nameof(processorFactory));
-		m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-	}
+	private readonly Func<IServiceProvider, TMessageProcessor> m_ProcessorFactory = processorFactory ?? throw new ArgumentNullException(nameof(processorFactory));
+	private readonly IServiceProvider m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
 	public ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
 		string subject,

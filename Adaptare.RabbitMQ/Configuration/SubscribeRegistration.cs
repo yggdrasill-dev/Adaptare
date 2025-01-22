@@ -67,19 +67,17 @@ internal class SubscribeRegistration<TMessage, THandler> : ISubscribeRegistratio
 				Subject,
 				ActivityKind.Consumer,
 				context,
-				tags: new[]
-				{
+				tags: [
 					new KeyValuePair<string, object?>("mq", "RabbitMQ"),
 					new KeyValuePair<string, object?>("handler", typeof(THandler).Name)
-				})
+				])
 			: RabbitMQConnectionManager._RabbitMQActivitySource.StartActivity(
 				ActivityKind.Consumer,
 				name: Subject,
-				tags: new[]
-				{
+				tags: [
 					new KeyValuePair<string, object?>("mq", "RabbitMQ"),
 					new KeyValuePair<string, object?>("handler", typeof(THandler).Name)
-				});
+				]);
 
 		try
 		{

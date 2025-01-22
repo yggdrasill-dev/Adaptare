@@ -4,16 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Adaptare.Direct.Configuration;
 
-public class DirectMessageQueueConfiguration
+public class DirectMessageQueueConfiguration(MessageQueueConfiguration messageQueueConfiguration)
 {
-	private static readonly List<ISubscribeRegistration> _SubscribeRegistrations = new();
+	private static readonly List<ISubscribeRegistration> _SubscribeRegistrations = [];
 
-	public DirectMessageQueueConfiguration(MessageQueueConfiguration messageQueueConfiguration)
-	{
-		Services = messageQueueConfiguration.Services;
-	}
-
-	public IServiceCollection Services { get; }
+	public IServiceCollection Services { get; } = messageQueueConfiguration.Services;
 
 	internal static IEnumerable<ISubscribeRegistration> SubscribeRegistrations => _SubscribeRegistrations;
 

@@ -1,21 +1,16 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Adaptare.Direct;
 
-internal class DirectSessionMessageSender<TQuestion, TMessageSession> : IMessageSender
+internal class DirectSessionMessageSender<TQuestion, TMessageSession>(
+	Func<IServiceProvider, TMessageSession> sessionFactory,
+	IServiceProvider serviceProvider)
+	: IMessageSender
 	where TMessageSession : IMessageSession<TQuestion>
 {
-	private readonly Func<IServiceProvider, TMessageSession> m_SessionFactory;
-	private readonly IServiceProvider m_ServiceProvider;
-
-	public DirectSessionMessageSender(
-		Func<IServiceProvider, TMessageSession> sessionFactory,
-		IServiceProvider serviceProvider)
-	{
-		m_SessionFactory = sessionFactory ?? throw new ArgumentNullException(nameof(sessionFactory));
-		m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-	}
+	private readonly Func<IServiceProvider, TMessageSession> m_SessionFactory = sessionFactory ?? throw new ArgumentNullException(nameof(sessionFactory));
+	private readonly IServiceProvider m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
 	public async ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
 		string subject,

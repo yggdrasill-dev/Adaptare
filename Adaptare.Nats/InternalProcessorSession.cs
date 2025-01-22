@@ -2,16 +2,9 @@
 
 namespace Adaptare.Nats;
 
-internal class InternalProcessorSession<TMessage, TReply, TProcessor> : IMessageSession<TMessage>
+internal class InternalProcessorSession<TMessage, TReply, TProcessor>(TProcessor processor) : IMessageSession<TMessage>
 	where TProcessor : IMessageProcessor<TMessage, TReply>
 {
-	private readonly TProcessor m_Processor;
-
-	public InternalProcessorSession(TProcessor processor)
-	{
-		m_Processor = processor;
-	}
-
 	public async ValueTask HandleAsync(Question<TMessage> question, CancellationToken cancellationToken = default)
 	{
 		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
@@ -21,7 +14,7 @@ internal class InternalProcessorSession<TMessage, TReply, TProcessor> : IMessage
 		_ = (activity?.AddTag("mq", "NATS")
 			.AddTag("handler", typeof(TProcessor).Name));
 
-		var result = await m_Processor.HandleAsync(
+		var result = await processor.HandleAsync(
 			question.Subject,
 			question.Data,
 			question.HeaderValues,

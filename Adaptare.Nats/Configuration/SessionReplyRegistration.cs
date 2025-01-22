@@ -50,17 +50,15 @@ internal class SessionReplyRegistration : ISubscribeRegistration
 				Subject,
 				ActivityKind.Consumer,
 				context,
-				tags: new[]
-				{
+				tags: [
 					new KeyValuePair<string, object?>("mq", "NATS")
-				})
+				])
 			: NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
 				ActivityKind.Consumer,
 				name: Subject,
-				tags: new[]
-				{
+				tags: [
 					new KeyValuePair<string, object?>("mq", "NATS")
-				});
+				]);
 
 		try
 		{
@@ -105,14 +103,14 @@ internal class SessionReplyRegistration : ISubscribeRegistration
 
 						_ = deserializeMethodInfo.Invoke(
 							this,
-							new object?[]{
+							[
 								replyGuid,
 								responseData,
 								store,
 								replySender,
 								replySubject,
 								askId != null && Guid.TryParse(askId, out var askGuid) ? askGuid : null
-							});
+							]);
 					}
 				}
 			}

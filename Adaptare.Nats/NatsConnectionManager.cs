@@ -5,14 +5,9 @@ using NATS.Client.JetStream;
 
 namespace Adaptare.Nats;
 
-internal class NatsConnectionManager : INatsConnectionManager
+internal class NatsConnectionManager(NatsConnection natsConnection) : INatsConnectionManager
 {
-	private readonly NatsConnection m_NatsConnection;
-
-	public NatsConnectionManager(NatsConnection natsConnection)
-	{
-		m_NatsConnection = natsConnection ?? throw new ArgumentNullException(nameof(natsConnection));
-	}
+	private readonly NatsConnection m_NatsConnection = natsConnection ?? throw new ArgumentNullException(nameof(natsConnection));
 
 	public INatsConnection Connection => m_NatsConnection;
 

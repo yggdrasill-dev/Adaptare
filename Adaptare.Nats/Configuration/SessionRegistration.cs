@@ -95,19 +95,17 @@ internal class SessionRegistration<TMessage, TMessageSession> : ISubscribeRegist
 				Subject,
 				ActivityKind.Consumer,
 				context,
-				tags: new[]
-				{
+				tags: [
 					new KeyValuePair<string, object?>("mq", "NATS"),
 					new KeyValuePair<string, object?>("handler", typeof(TMessageSession).Name)
-				})
+				])
 			: NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
 				ActivityKind.Consumer,
 				name: Subject,
-				tags: new[]
-				{
+				tags: [
 					new KeyValuePair<string, object?>("mq", "NATS"),
 					new KeyValuePair<string, object?>("handler", typeof(TMessageSession).Name)
-				});
+				]);
 
 		try
 		{

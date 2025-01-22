@@ -2,18 +2,15 @@
 
 namespace Adaptare;
 
-internal class MultiplexerMessageSender : IMessageSender, IMessageExchange
+internal class MultiplexerMessageSender(
+	IServiceProvider serviceProvider,
+	IEnumerable<IMessageExchange> exchanges)
+	: IMessageSender, IMessageExchange
 {
 	private static readonly ActivitySource _SenderActivitySource = new($"Adaptare.MessageQueue.{nameof(MultiplexerMessageSender)}");
 
-	private readonly IMessageExchange[] m_Exchanges = Array.Empty<IMessageExchange>();
-	private readonly IServiceProvider m_ServiceProvider;
-
-	public MultiplexerMessageSender(IServiceProvider serviceProvider, IEnumerable<IMessageExchange> exchanges)
-	{
-		m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-		m_Exchanges = (exchanges ?? throw new ArgumentNullException(nameof(exchanges))).ToArray();
-	}
+	private readonly IMessageExchange[] m_Exchanges = (exchanges ?? throw new ArgumentNullException(nameof(exchanges))).ToArray();
+	private readonly IServiceProvider m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
 	public ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
 		string subject,

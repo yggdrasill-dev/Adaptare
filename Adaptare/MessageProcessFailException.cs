@@ -1,17 +1,12 @@
 ﻿namespace Adaptare;
 
-public class MessageProcessFailException : Exception
+public class MessageProcessFailException(string? responseData)
+	: Exception("MessageQueue remote process fail.")
 {
 	public MessageProcessFailException()
 		: this(null)
 	{
 	}
 
-	public MessageProcessFailException(string? responseData)
-		: base("MessageQueue remote process fail.")
-	{
-		ResponseData = responseData;
-	}
-
-	public string? ResponseData { get; }
+	public string? ResponseData { get; } = responseData;
 }

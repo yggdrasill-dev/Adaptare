@@ -8,7 +8,7 @@ public class RabbitMessageQueueConfiguration
 {
 	internal static ActivitySource _RabbitActivitySource = new("Adaptare.MessageQueue.RabbitMQ");
 
-	private readonly List<ISubscribeRegistration> m_SubscribeRegistrations = new();
+	private readonly List<ISubscribeRegistration> m_SubscribeRegistrations = [];
 
 	public RabbitMessageQueueConfiguration(MessageQueueConfiguration coreConfiguration)
 	{

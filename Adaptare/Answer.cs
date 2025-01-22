@@ -14,12 +14,12 @@ public abstract record Answer<TAnswer>
 	public ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
 		TMessage data,
 		CancellationToken cancellationToken = default)
-		=> AskAsync<TMessage, TReply>(data, Array.Empty<MessageHeaderValue>(), cancellationToken);
+		=> AskAsync<TMessage, TReply>(data, [], cancellationToken);
 
 	public abstract ValueTask CompleteAsync<TReply>(TReply data, IEnumerable<MessageHeaderValue> header, CancellationToken cancellationToken = default);
 
 	public ValueTask CompleteAsync<TReply>(TReply data, CancellationToken cancellationToken = default)
-		=> CompleteAsync(data, Array.Empty<MessageHeaderValue>(), cancellationToken);
+		=> CompleteAsync(data, [], cancellationToken);
 
 	public abstract ValueTask CompleteAsync(IEnumerable<MessageHeaderValue> header, CancellationToken cancellationToken = default);
 
@@ -29,5 +29,5 @@ public abstract record Answer<TAnswer>
 	public abstract ValueTask FailAsync(string data, IEnumerable<MessageHeaderValue> header, CancellationToken cancellationToken = default);
 
 	public ValueTask FailAsync(string data, CancellationToken cancellationToken = default)
-		=> FailAsync(data, Array.Empty<MessageHeaderValue>(), cancellationToken);
+		=> FailAsync(data, [], cancellationToken);
 }

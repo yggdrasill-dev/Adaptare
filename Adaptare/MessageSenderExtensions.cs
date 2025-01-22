@@ -10,7 +10,7 @@ public static class MessageSenderExtensions
 		=> messageSender.AskAsync<TMessage, TReply>(
 			subject,
 			data,
-			Array.Empty<MessageHeaderValue>(),
+			[],
 			cancellationToken);
 
 	public static ValueTask PublishAsync<TMessage>(
@@ -18,7 +18,7 @@ public static class MessageSenderExtensions
 		string subject,
 		TMessage data,
 		CancellationToken cancellationToken = default)
-		=> messageSender.PublishAsync(subject, data, Array.Empty<MessageHeaderValue>(), cancellationToken);
+		=> messageSender.PublishAsync(subject, data, [], cancellationToken);
 
 	public static ValueTask PublishFailAsync(
 		this IMessageSender messageSender,
@@ -28,7 +28,7 @@ public static class MessageSenderExtensions
 		=> messageSender.PublishAsync(
 			subject,
 			Array.Empty<byte>(),
-			new[] { new MessageHeaderValue(MessageHeaderValueConsts.FailHeaderKey, data) },
+			[new MessageHeaderValue(MessageHeaderValueConsts.FailHeaderKey, data)],
 			cancellationToken);
 
 	public static ValueTask PublishFailAsync(
@@ -51,7 +51,7 @@ public static class MessageSenderExtensions
 		=> messageSender.RequestAsync<TMessage, TReply>(
 			subject,
 			data,
-			Array.Empty<MessageHeaderValue>(),
+			[],
 			cancellationToken);
 
 	public static ValueTask SendAsync<TMessage>(
@@ -59,5 +59,5 @@ public static class MessageSenderExtensions
 		string subject,
 		TMessage data,
 		CancellationToken cancellationToken = default)
-		=> messageSender.SendAsync(subject, data, Array.Empty<MessageHeaderValue>(), cancellationToken);
+		=> messageSender.SendAsync(subject, data, [], cancellationToken);
 }

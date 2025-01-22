@@ -11,8 +11,8 @@ public class NatsMessageQueueConfiguration
 	internal static ActivitySource _NatsActivitySource = new("Adaptare.MessageQueue.Nats");
 
 	private readonly MessageQueueConfiguration m_CoreConfiguration;
-	private readonly List<StreamConfig> m_StreamRegistrations = new();
-	private readonly List<ISubscribeRegistration> m_SubscribeRegistrations = new();
+	private readonly List<StreamConfig> m_StreamRegistrations = [];
+	private readonly List<ISubscribeRegistration> m_SubscribeRegistrations = [];
 
 	public NatsMessageQueueConfiguration(MessageQueueConfiguration coreConfiguration)
 	{

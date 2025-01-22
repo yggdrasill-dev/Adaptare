@@ -30,9 +30,9 @@ internal record NatsAnswer<TAnswer> : Answer<TAnswer>
 			? m_MessageSender.AskAsync<TMessage, TReply>(
 				ReplySubject!,
 				data,
-				header.Concat(new[] {
+				header.Concat([
 					new MessageHeaderValue(MessageHeaderValueConsts.SessionReplyKey, ReplyId.ToString()),
-					new MessageHeaderValue(MessageHeaderValueConsts.SessionAskKey, string.Empty) }),
+					new MessageHeaderValue(MessageHeaderValueConsts.SessionAskKey, string.Empty) ]),
 				cancellationToken)
 			: throw new NatsReplySubjectNullException();
 
@@ -41,8 +41,8 @@ internal record NatsAnswer<TAnswer> : Answer<TAnswer>
 			? m_MessageSender.PublishAsync(
 				ReplySubject!,
 				data,
-				header.Concat(new[] {
-					new MessageHeaderValue(MessageHeaderValueConsts.SessionReplyKey, ReplyId.ToString())}),
+				header.Concat([
+					new MessageHeaderValue(MessageHeaderValueConsts.SessionReplyKey, ReplyId.ToString())]),
 				cancellationToken)
 			: throw new NatsReplySubjectNullException();
 

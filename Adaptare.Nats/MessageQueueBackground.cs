@@ -5,27 +5,19 @@ using NATS.Client.JetStream.Models;
 
 namespace Adaptare.Nats;
 
-internal class MessageQueueBackground : BackgroundService
+internal class MessageQueueBackground(
+	INatsMessageQueueService natsMessageQueueService,
+	IServiceProvider serviceProvider,
+	IEnumerable<ISubscribeRegistration> subscribes,
+	IEnumerable<StreamConfig> streamRegistrations,
+	ILogger<MessageQueueBackground> logger)
+	: BackgroundService
 {
-	private readonly ILogger<MessageQueueBackground> m_Logger;
-	private readonly INatsMessageQueueService m_NatsMessageQueueService;
-	private readonly IServiceProvider m_ServiceProvider;
-	private readonly IEnumerable<ISubscribeRegistration> m_Subscribes;
-	private readonly IEnumerable<StreamConfig> m_StreamRegistrations;
-
-	public MessageQueueBackground(
-		INatsMessageQueueService natsMessageQueueService,
-		IServiceProvider serviceProvider,
-		IEnumerable<ISubscribeRegistration> subscribes,
-		IEnumerable<StreamConfig> streamRegistrations,
-		ILogger<MessageQueueBackground> logger)
-	{
-		m_NatsMessageQueueService = natsMessageQueueService ?? throw new ArgumentNullException(nameof(natsMessageQueueService));
-		m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-		m_Subscribes = subscribes ?? throw new ArgumentNullException(nameof(subscribes));
-		m_StreamRegistrations = streamRegistrations ?? throw new ArgumentNullException(nameof(streamRegistrations));
-		m_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly ILogger<MessageQueueBackground> m_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	private readonly INatsMessageQueueService m_NatsMessageQueueService = natsMessageQueueService ?? throw new ArgumentNullException(nameof(natsMessageQueueService));
+	private readonly IServiceProvider m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+	private readonly IEnumerable<ISubscribeRegistration> m_Subscribes = subscribes ?? throw new ArgumentNullException(nameof(subscribes));
+	private readonly IEnumerable<StreamConfig> m_StreamRegistrations = streamRegistrations ?? throw new ArgumentNullException(nameof(streamRegistrations));
 
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{

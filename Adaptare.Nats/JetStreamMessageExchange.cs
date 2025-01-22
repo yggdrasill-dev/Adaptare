@@ -4,16 +4,9 @@ using NATS.Client.Core;
 
 namespace Adaptare.Nats;
 
-internal class JetStreamMessageExchange : IMessageExchange
+internal class JetStreamMessageExchange(string pattern, INatsSerializerRegistry? natsSerializerRegistry) : IMessageExchange
 {
-	private readonly Glob m_Glob;
-	private readonly INatsSerializerRegistry? m_NatsSerializerRegistry;
-
-	public JetStreamMessageExchange(string pattern, INatsSerializerRegistry? natsSerializerRegistry)
-	{
-		m_Glob = Glob.Parse(pattern);
-		m_NatsSerializerRegistry = natsSerializerRegistry;
-	}
+	private readonly Glob m_Glob = Glob.Parse(pattern);
 
 	public IMessageSender GetMessageSender(string subject, IServiceProvider serviceProvider)
 	{
@@ -21,7 +14,7 @@ internal class JetStreamMessageExchange : IMessageExchange
 
 		return connectionMgr.CreateJetStreamMessageSender(
 			serviceProvider,
-			m_NatsSerializerRegistry);
+			natsSerializerRegistry);
 	}
 
 	public bool Match(string subject, IEnumerable<MessageHeaderValue> header)
