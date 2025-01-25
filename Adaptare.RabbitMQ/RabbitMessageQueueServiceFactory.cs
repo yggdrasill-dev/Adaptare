@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
-using Adaptare.RabbitMQ;
 
 namespace Adaptare.RabbitMQ;
 

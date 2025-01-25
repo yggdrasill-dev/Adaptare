@@ -6,10 +6,15 @@ namespace Adaptare.RabbitMQ;
 internal class RabbitMessageQueueService(
 	string exchangeName,
 	IChannel channel,
-	IRabbitMQSerializerRegistry serializerRegistry) : IMessageQueueService
+	IRabbitMQSerializerRegistry serializerRegistry)
+	: IMessageQueueService
+	, IDisposable
+	, IAsyncDisposable
 {
+	private bool m_DisposedValue;
+
 	public ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
-		string subject,
+			string subject,
 		TMessage data,
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken)
@@ -63,6 +68,45 @@ internal class RabbitMessageQueueService(
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken)
 		=> throw new NotSupportedException();
+
+	public void Dispose()
+	{
+		// 請勿變更此程式碼。請將清除程式碼放入 'Dispose(bool disposing)' 方法
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		await CoreDisposeAsync().ConfigureAwait(false);
+
+		Dispose(disposing: false);
+		GC.SuppressFinalize(this);
+	}
+
+	protected virtual async ValueTask CoreDisposeAsync()
+	{
+		if (channel is not null)
+		{
+			await channel.DisposeAsync().ConfigureAwait(false);
+		}
+	}
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!m_DisposedValue)
+		{
+			if (disposing)
+			{
+				if (channel is IDisposable disposableChannel)
+				{
+					disposableChannel.Dispose();
+				}
+			}
+
+			m_DisposedValue = true;
+		}
+	}
 
 	private static BasicProperties BuildBasicProperties(IEnumerable<MessageHeaderValue> header)
 	{

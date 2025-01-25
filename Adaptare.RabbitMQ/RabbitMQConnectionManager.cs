@@ -10,18 +10,23 @@ namespace Adaptare.RabbitMQ;
 internal class RabbitMQConnectionManager(
 	IServiceProvider serviceProvider,
 	IOptions<RabbitMQOptions> optionsAccessor,
-	ILogger<RabbitMQConnectionManager> logger) : IDisposable, IAsyncDisposable, IMessageReceiver<RabbitSubscriptionSettings>
+	ILogger<RabbitMQConnectionManager> logger)
+	: IDisposable
+	, IAsyncDisposable
+	, IMessageReceiver<RabbitSubscriptionSettings>
 {
 	internal static readonly ActivitySource _RabbitMQActivitySource = new("Adaptare.MessageQueue.RabbitMQ");
 
 	private readonly ILogger<RabbitMQConnectionManager> m_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	private readonly RabbitMQOptions m_Options = optionsAccessor.Value;
 	private readonly IServiceProvider m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+	private readonly TaskCompletionSource<IConnection> m_ConnectionCompletionSource = new();
 	private IConnection? m_Connection;
 	private bool m_DisposedValue;
 	private IChannel? m_DeclareChannel;
 
-	public IChannel SenderChannel { get; private set; } = default!;
+	public Task<IConnection> GetConnectionAsync(CancellationToken cancellationToken = default)
+		=> m_ConnectionCompletionSource.Task.WaitAsync(cancellationToken);
 
 	public async Task StartAsync(CancellationToken cancellationToken = default)
 	{
@@ -40,9 +45,6 @@ internal class RabbitMQConnectionManager(
 		m_DeclareChannel.ChannelShutdownAsync += MessageQueueChannel_ModelShutdownAsync;
 
 		m_Options.OnSetupQueueAndExchange?.Invoke(m_DeclareChannel);
-
-		SenderChannel = await m_Connection.CreateChannelAsync(
-			cancellationToken: cancellationToken).ConfigureAwait(false);
 	}
 
 	public async Task StopAsync(CancellationToken cancellationToken = default)
@@ -156,31 +158,31 @@ internal class RabbitMQConnectionManager(
 
 	private Task Connection_CallbackExceptionAsync(object? sender, CallbackExceptionEventArgs e)
 	{
-		m_Logger.LogError(e.Exception, "Sender CallbackExceptionEvent");
+		m_Logger.LogError(e.Exception, "CallbackExceptionEvent");
 		return Task.CompletedTask;
 	}
 
 	private Task Connection_ConnectionBlockedAsync(object? sender, ConnectionBlockedEventArgs e)
 	{
-		m_Logger.LogInformation("Sender ConnectionBlockedEvent, Reason: {reason}", e.Reason);
+		m_Logger.LogInformation("ConnectionBlockedEvent, Reason: {reason}", e.Reason);
 		return Task.CompletedTask;
 	}
 
 	private Task Connection_ConnectionShutdownAsync(object? sender, ShutdownEventArgs e)
 	{
-		m_Logger.LogInformation("Sender ConnectionShutdownEvent");
+		m_Logger.LogInformation("ConnectionShutdownEvent");
 		return Task.CompletedTask;
 	}
 
 	private Task Connection_ConnectionUnblockedAsync(object? sender, AsyncEventArgs e)
 	{
-		m_Logger.LogInformation("Sender ConnectionUnblockedEvent");
+		m_Logger.LogInformation("ConnectionUnblockedEvent");
 		return Task.CompletedTask;
 	}
 
 	private Task MessageQueueChannel_ModelShutdownAsync(object? sender, ShutdownEventArgs e)
 	{
-		m_Logger.LogInformation("Sender ChanndelShutdownEvent");
+		m_Logger.LogInformation("Declare ChannelShutdownEvent");
 		return Task.CompletedTask;
 	}
 }

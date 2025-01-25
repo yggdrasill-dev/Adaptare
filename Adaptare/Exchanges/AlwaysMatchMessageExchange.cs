@@ -5,8 +5,15 @@ namespace Adaptare.Exchanges;
 public class AlwaysMatchMessageExchange<TMessageSender> : IMessageExchange
 	where TMessageSender : class, IMessageSender
 {
-	public IMessageSender GetMessageSender(string subject, IServiceProvider serviceProvider)
-		=> serviceProvider.GetRequiredService<TMessageSender>();
+	public ValueTask<IMessageSender> GetMessageSenderAsync(
+		string subject,
+		IServiceProvider serviceProvider,
+		CancellationToken cancellationToken = default)
+		=> ValueTask.FromResult<IMessageSender>(serviceProvider.GetRequiredService<TMessageSender>());
 
-	public bool Match(string subject, IEnumerable<MessageHeaderValue> header) => true;
+	public ValueTask<bool> MatchAsync(
+		string subject,
+		IEnumerable<MessageHeaderValue> header,
+		CancellationToken cancellationToken = default)
+		=> ValueTask.FromResult(true);
 }

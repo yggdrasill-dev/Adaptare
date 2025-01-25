@@ -1,6 +1,4 @@
-﻿using NSubstitute;
-
-namespace Adaptare.UnitTests;
+﻿namespace Adaptare.UnitTests;
 
 public class MultiplexerMessageSenderTests
 {
@@ -13,11 +11,16 @@ public class MultiplexerMessageSenderTests
 		var exchange2 = Substitute.For<IMessageExchange>();
 
 		_ = exchange1
-			.Match(Arg.Any<string>(), Arg.Any<IEnumerable<MessageHeaderValue>>())
+			.MatchAsync(Arg.Any<string>(), Arg.Any<IEnumerable<MessageHeaderValue>>())
 			.Returns(true);
 		_ = exchange2
-			.Match(Arg.Any<string>(), Arg.Any<IEnumerable<MessageHeaderValue>>())
+			.MatchAsync(Arg.Any<string>(), Arg.Any<IEnumerable<MessageHeaderValue>>())
 			.Returns(true);
+
+		_ = exchange1.GetMessageSenderAsync(Arg.Any<string>(), Arg.Any<IServiceProvider>())
+			.Returns(Substitute.For<IMessageSender>());
+		_ = exchange2.GetMessageSenderAsync(Arg.Any<string>(), Arg.Any<IServiceProvider>())
+			.Returns(Substitute.For<IMessageSender>());
 
 		var sut = new MultiplexerMessageSender(
 			fakeServiceProvider,
@@ -28,11 +31,10 @@ public class MultiplexerMessageSenderTests
 
 		await sut.PublishAsync("test", Array.Empty<byte>());
 
-		_ = exchange1.Received(1)
-			.GetMessageSender(Arg.Is("test"), Arg.Any<IServiceProvider>());
-
-		_ = exchange2.Received(0)
-			.GetMessageSender(Arg.Is("test"), Arg.Any<IServiceProvider>());
+		_ = await exchange1.Received(1)
+			.GetMessageSenderAsync(Arg.Is("test"), Arg.Any<IServiceProvider>());
+		_ = await exchange2.Received(0)
+			.GetMessageSenderAsync(Arg.Is("test"), Arg.Any<IServiceProvider>());
 	}
 
 	[Fact]

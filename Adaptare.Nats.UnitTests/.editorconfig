@@ -8,5 +8,8 @@ indent_style = space
 # CA2012: Use ValueTasks correctly
 dotnet_diagnostic.CA2012.severity = none
 
+# CA2007: Consider calling ConfigureAwait on the awaited task
+dotnet_diagnostic.CA2007.severity = none
+
 [*.xml]
 indent_size = 2

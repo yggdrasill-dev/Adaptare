@@ -2,7 +2,13 @@
 
 public interface IMessageExchange
 {
-	IMessageSender GetMessageSender(string subject, IServiceProvider serviceProvider);
+	ValueTask<IMessageSender> GetMessageSenderAsync(
+		string subject,
+		IServiceProvider serviceProvider,
+		CancellationToken cancellationToken = default);
 
-	bool Match(string subject, IEnumerable<MessageHeaderValue> header);
+	ValueTask<bool> MatchAsync(
+		string subject,
+		IEnumerable<MessageHeaderValue> header,
+		CancellationToken cancellationToken = default);
 }
