@@ -17,12 +17,12 @@ internal class JetStreamMessageExchange(string pattern, INatsSerializerRegistry?
 
 		return await Task.FromResult(connectionMgr.CreateJetStreamMessageSender(
 			serviceProvider,
-			natsSerializerRegistry));
+			natsSerializerRegistry)).ConfigureAwait(false);
 	}
 
 	public async ValueTask<bool> MatchAsync(
 		string subject,
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken = default)
-		=> await Task.FromResult(m_Glob.IsMatch(subject));
+		=> await Task.FromResult(m_Glob.IsMatch(subject)).ConfigureAwait(false);
 }

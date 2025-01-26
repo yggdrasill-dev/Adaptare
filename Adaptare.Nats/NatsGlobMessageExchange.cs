@@ -22,12 +22,12 @@ internal class NatsGlobMessageExchange(
 		return await Task.FromResult(connectionMgr.CreateMessageSender(
 			serviceProvider,
 			natsSerializerRegistry,
-			sessionReplySubject));
+			sessionReplySubject)).ConfigureAwait(false);
 	}
 
 	public async ValueTask<bool> MatchAsync(
 		string subject,
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken = default)
-		=> await Task.FromResult(m_Glob.IsMatch(subject));
+		=> await Task.FromResult(m_Glob.IsMatch(subject)).ConfigureAwait(false);
 }
