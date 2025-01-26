@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Adaptare.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using RabbitMQ.Client;
 
 namespace Adaptare.RabbitMQ.Configuration;
 
@@ -9,6 +10,8 @@ public class RabbitMessageQueueConfiguration
 	internal static ActivitySource _RabbitActivitySource = new("Adaptare.MessageQueue.RabbitMQ");
 
 	private readonly List<ISubscribeRegistration> m_SubscribeRegistrations = [];
+
+	public IServiceCollection Services { get; }
 
 	public RabbitMessageQueueConfiguration(MessageQueueConfiguration coreConfiguration)
 	{
@@ -19,7 +22,17 @@ public class RabbitMessageQueueConfiguration
 		_ = Services.AddSingleton<IEnumerable<ISubscribeRegistration>>(m_SubscribeRegistrations);
 	}
 
-	public IServiceCollection Services { get; }
+	public RabbitMessageQueueConfiguration ConfigureConnection(
+		Func<IServiceProvider, ConnectionFactory> resolveConnectionFactory,
+		Action<IChannel> setupQueueAndExchange)
+	{
+		Services.AddSingleton(sp => ActivatorUtilities.CreateInstance<RabbitMQConnectionManager>(
+			sp,
+			resolveConnectionFactory(sp),
+			setupQueueAndExchange));
+
+		return this;
+	}
 
 	public RabbitMessageQueueConfiguration AddHandler<THandler>(
 		string queueName,
@@ -71,15 +84,6 @@ public class RabbitMessageQueueConfiguration
 				$"Unable to create registration for handler type {handlerType.FullName}");
 
 		m_SubscribeRegistrations.Add(registration);
-
-		return this;
-	}
-
-	public RabbitMessageQueueConfiguration ConfigQueueOptions(Action<RabbitMQOptions, IServiceProvider> configure)
-	{
-		_ = Services
-			.AddOptions<RabbitMQOptions>()
-			.Configure(configure);
 
 		return this;
 	}

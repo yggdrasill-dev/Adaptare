@@ -15,8 +15,9 @@ public partial class DependencyInjectionTests
         // Act
         sut.AddMessageQueue()
             .AddRabbitMessageQueue(configure => configure
-                .ConfigQueueOptions((options, sp) => options
-                    .BuildConnectionFactory = () => new ConnectionFactory()));
+                .ConfigureConnection(
+                    sp => new ConnectionFactory(),
+                    channel => { }));
     }
 
     [Fact]

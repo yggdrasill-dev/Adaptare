@@ -5,11 +5,11 @@ using Microsoft.Extensions.Logging;
 namespace Adaptare.RabbitMQ;
 
 internal class MessageQueueBackground(
-	IMessageReceiver<RabbitSubscriptionSettings> messageReceiver,
 	IServiceProvider serviceProvider,
 	IEnumerable<ISubscribeRegistration> subscribes,
 	RabbitMQConnectionManager rabbitMQConnectionManager,
-	ILogger<MessageQueueBackground> logger) : BackgroundService
+	ILogger<MessageQueueBackground> logger)
+	: BackgroundService
 {
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
@@ -21,7 +21,7 @@ internal class MessageQueueBackground(
 		foreach (var registration in subscribes)
 			subscriptions.Add(
 				await registration.SubscribeAsync(
-					messageReceiver,
+					rabbitMQConnectionManager,
 					serviceProvider,
 					logger,
 					stoppingToken).ConfigureAwait(false));

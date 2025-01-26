@@ -39,9 +39,6 @@ public static class ServiceCollectitonExtensions
 		=> configuration.Services
 			.AddSingleton<RabbitMQConnectionManager>()
 			.AddSingleton<IMessageSenderFactory, RabbitMessageSenderFactory>()
-			.AddSingleton<IMessageReceiver<RabbitSubscriptionSettings>, RabbitMQConnectionManager>(
-				sp => sp.GetRequiredService<RabbitMQConnectionManager>())
 			.AddSingleton<IRabbitMQSerializerRegistry, RabbitMQSerializerRegistry>()
-			.AddHostedService<MessageQueueBackground>()
-			.AddOptions<RabbitMQOptions>();
+			.AddHostedService<MessageQueueBackground>();
 }
