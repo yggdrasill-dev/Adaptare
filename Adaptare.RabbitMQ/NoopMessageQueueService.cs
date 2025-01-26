@@ -1,8 +1,6 @@
-﻿using Adaptare.RabbitMQ;
+﻿namespace Adaptare.RabbitMQ;
 
-namespace Adaptare.RabbitMQ;
-
-internal class NoopMessageQueueService : IMessageQueueService
+internal class NoopMessageQueueService : IMessageSender
 {
 	public ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
 		string subject,

@@ -11,7 +11,7 @@ public class RabbitMessageQueueServiceTests
         // Arrange
         var fakeChannel = Substitute.For<IChannel>();
 
-        var sut = new RabbitMessageQueueService(
+        var sut = new RabbitMessageSender(
             "test",
             fakeChannel,
             RabbitMQSerializerRegistry.Default);

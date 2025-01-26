@@ -24,11 +24,11 @@ internal class RabbitGlobMessageExchange : IMessageExchange
 		IServiceProvider serviceProvider,
 		CancellationToken cancellationToken = default)
 	{
-		var factory = serviceProvider.GetRequiredService<IMessageQueueServiceFactory>();
+		var factory = serviceProvider.GetRequiredService<IMessageSenderFactory>();
 		var connectionManager = serviceProvider.GetRequiredService<RabbitMQConnectionManager>();
 		var connection = await connectionManager.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
 
-		return factory.CreateMessageQueueService(
+		return factory.CreateMessageSender(
 			 serviceProvider,
 			 m_ExchangeName,
 			 await connection.CreateChannelAsync(m_CreateChannelOptions, cancellationToken).ConfigureAwait(false));

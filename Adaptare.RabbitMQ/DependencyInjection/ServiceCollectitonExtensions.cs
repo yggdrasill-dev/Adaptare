@@ -19,7 +19,7 @@ public static class ServiceCollectitonExtensions
 		}
 
 		return services
-			.AddSingleton<IMessageQueueServiceFactory, NoopMessageQueueServiceFactory>();
+			.AddSingleton<IMessageSenderFactory, NoopMessageSenderFactory>();
 	}
 
 	public static MessageQueueConfiguration AddRabbitMessageQueue(
@@ -38,7 +38,7 @@ public static class ServiceCollectitonExtensions
 	private static void InitialRabbitMessageQueueConfiguration(RabbitMessageQueueConfiguration configuration)
 		=> configuration.Services
 			.AddSingleton<RabbitMQConnectionManager>()
-			.AddSingleton<IMessageQueueServiceFactory, RabbitMessageQueueServiceFactory>()
+			.AddSingleton<IMessageSenderFactory, RabbitMessageSenderFactory>()
 			.AddSingleton<IMessageReceiver<RabbitSubscriptionSettings>, RabbitMQConnectionManager>(
 				sp => sp.GetRequiredService<RabbitMQConnectionManager>())
 			.AddSingleton<IRabbitMQSerializerRegistry, RabbitMQSerializerRegistry>()

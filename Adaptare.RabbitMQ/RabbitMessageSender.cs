@@ -3,11 +3,11 @@ using RabbitMQ.Client;
 
 namespace Adaptare.RabbitMQ;
 
-internal class RabbitMessageQueueService(
+internal class RabbitMessageSender(
 	string exchangeName,
 	IChannel channel,
 	IRabbitMQSerializerRegistry serializerRegistry)
-	: IMessageQueueService
+	: IMessageSender
 	, IDisposable
 	, IAsyncDisposable
 {
