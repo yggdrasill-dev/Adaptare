@@ -6,14 +6,15 @@ internal class MultiplexerMessageSender(
 	IServiceProvider serviceProvider,
 	IEnumerable<IMessageExchange> exchanges)
 	: IMessageSender
+	, IDisposable
+	, IAsyncDisposable
 {
 	private static readonly ActivitySource _SenderActivitySource = new($"Adaptare.MessageQueue.{nameof(MultiplexerMessageSender)}");
 
-	private readonly IMessageExchange[] m_Exchanges = (exchanges ?? throw new ArgumentNullException(nameof(exchanges))).ToArray();
-	private readonly IServiceProvider m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+	private bool m_DisposedValue;
 
 	public async ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
-		string subject,
+			string subject,
 		TMessage data,
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken)
@@ -88,19 +89,56 @@ internal class MultiplexerMessageSender(
 		await sender.SendAsync(subject, data, header, cancellationToken).ConfigureAwait(false);
 	}
 
+	public void Dispose()
+	{
+		// 請勿變更此程式碼。請將清除程式碼放入 'Dispose(bool disposing)' 方法
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		foreach (var exchange in exchanges)
+		{
+			if (exchange is IAsyncDisposable asyncDisposable)
+				await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+			else if (exchange is IDisposable disposable)
+				disposable.Dispose();
+		}
+
+		GC.SuppressFinalize(this);
+	}
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!m_DisposedValue)
+		{
+			if (disposing)
+			{
+				foreach (var exchange in exchanges)
+				{
+					if (exchange is IDisposable disposable)
+						disposable.Dispose();
+				}
+			}
+
+			m_DisposedValue = true;
+		}
+	}
+
 	private async Task<IMessageSender> GetMessageSenderAsync(
-		string subject,
+					string subject,
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken = default)
 	{
 		using var activity = _SenderActivitySource.StartActivity($"{nameof(MultiplexerMessageSender)}.{nameof(GetMessageSenderAsync)}");
 		_ = (activity?.AddTag("subject", subject));
 
-		foreach (var exchange in m_Exchanges)
+		foreach (var exchange in exchanges)
 			if (await exchange.MatchAsync(subject, header, cancellationToken).ConfigureAwait(false))
 				return await exchange.GetMessageSenderAsync(
 					subject,
-					m_ServiceProvider,
+					serviceProvider,
 					cancellationToken).ConfigureAwait(false);
 
 		throw new MessageSenderNotFoundException(subject);

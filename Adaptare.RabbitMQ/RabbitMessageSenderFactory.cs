@@ -5,6 +5,10 @@ namespace Adaptare.RabbitMQ;
 
 internal class RabbitMessageSenderFactory : IMessageSenderFactory
 {
-	public IMessageSender CreateMessageSender(IServiceProvider serviceProvider, string exchangeName, IChannel channel)
-		=> ActivatorUtilities.CreateInstance<RabbitMessageSender>(serviceProvider, exchangeName, channel);
+	public IMessageSender CreateMessageSender(
+		IServiceProvider serviceProvider,
+		string exchangeName,
+		IChannel channel,
+		IRabbitMQSerializerRegistry rabbitMQSerializerRegistry)
+		=> ActivatorUtilities.CreateInstance<RabbitMessageSender>(serviceProvider, exchangeName, channel, rabbitMQSerializerRegistry);
 }

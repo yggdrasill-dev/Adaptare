@@ -6,13 +6,13 @@ namespace Adaptare.RabbitMQ.Configuration;
 
 internal class MessageDataInfo
 {
-	public BasicDeliverEventArgs Args { get; init; } = default!;
+	public required BasicDeliverEventArgs Args { get; init; }
 
-	public CancellationToken CancellationToken { get; init; }
+	public required CancellationToken CancellationToken { get; init; }
 
-	public IChannel Channel { get; init; } = default!;
+	public required IChannel Channel { get; init; }
 
-	public ILogger Logger { get; init; } = default!;
+	public required ILogger Logger { get; init; }
 
-	public IServiceProvider ServiceProvider { get; init; } = default!;
+	public required IServiceProvider ServiceProvider { get; init; }
 }

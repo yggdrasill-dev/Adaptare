@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using System.Text;
 
 namespace Adaptare.RabbitMQ;
 
@@ -13,6 +14,7 @@ public class RabbitMQRawSerializer<T>(IRabbitMQSerializer<T>? next) : IRabbitMQS
 			Memory<byte> memory => memory.ToArray(),
 			ReadOnlyMemory<byte> readOnlyMemory => readOnlyMemory,
 			ReadOnlySequence<byte> readOnlySequence => readOnlySequence.ToArray(),
+			string text => Encoding.UTF8.GetBytes(text),
 			_ => next == null
 				? throw new RabbitMQException($"Can't serialize {typeof(T)}")
 				: next.Serialize(message)

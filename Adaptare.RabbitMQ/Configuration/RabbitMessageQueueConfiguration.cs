@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Adaptare.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using RabbitMQ.Client;
 
 namespace Adaptare.RabbitMQ.Configuration;
@@ -8,28 +9,39 @@ namespace Adaptare.RabbitMQ.Configuration;
 public class RabbitMessageQueueConfiguration
 {
 	internal static ActivitySource _RabbitActivitySource = new("Adaptare.MessageQueue.RabbitMQ");
-
-	private readonly List<ISubscribeRegistration> m_SubscribeRegistrations = [];
+	private readonly string m_RegisterName;
 
 	public IServiceCollection Services { get; }
 
-	public RabbitMessageQueueConfiguration(MessageQueueConfiguration coreConfiguration)
+	public RabbitMessageQueueConfiguration(string registerName, MessageQueueConfiguration coreConfiguration)
 	{
 		ArgumentNullException.ThrowIfNull(coreConfiguration, nameof(coreConfiguration));
 
 		Services = coreConfiguration.Services;
-
-		_ = Services.AddSingleton<IEnumerable<ISubscribeRegistration>>(m_SubscribeRegistrations);
+		m_RegisterName = registerName;
+		Services.TryAddKeyedSingleton<IRabbitMQSerializerRegistry>(m_RegisterName, RabbitMQSerializerRegistry.Default);
+		Services.AddHostedService(sp => ActivatorUtilities.CreateInstance<MessageQueueBackground>(
+			sp,
+			sp.GetKeyedServices<ISubscribeRegistration>(m_RegisterName),
+			sp.GetRequiredKeyedService<RabbitMQConnectionManager>(m_RegisterName)));
 	}
 
 	public RabbitMessageQueueConfiguration ConfigureConnection(
-		Func<IServiceProvider, ConnectionFactory> resolveConnectionFactory,
-		Action<IChannel> setupQueueAndExchange)
+		Func<IServiceProvider, RabbitMQConnectionOptions> createOptions)
 	{
-		Services.AddSingleton(sp => ActivatorUtilities.CreateInstance<RabbitMQConnectionManager>(
-			sp,
-			resolveConnectionFactory(sp),
-			setupQueueAndExchange));
+		Services.AddKeyedSingleton(
+			m_RegisterName,
+			(sp, _) => ActivatorUtilities.CreateInstance<RabbitMQConnectionManager>(
+				sp,
+				createOptions(sp)));
+
+		return this;
+	}
+
+	public RabbitMessageQueueConfiguration UseSerializerRegistry<TSerializerRegister>()
+		where TSerializerRegister : class, IRabbitMQSerializerRegistry
+	{
+		Services.AddKeyedSingleton<IRabbitMQSerializerRegistry, TSerializerRegister>(m_RegisterName);
 
 		return this;
 	}
@@ -37,7 +49,8 @@ public class RabbitMessageQueueConfiguration
 	public RabbitMessageQueueConfiguration AddHandler<THandler>(
 		string queueName,
 		bool autoAck = true,
-		ushort dispatchConcurrency = 1,
+		CreateChannelOptions? createChannelOptions = null,
+		IRabbitMQSerializerRegistry? serializerRegistry = null,
 		Func<IServiceProvider, THandler>? handlerFactory = null)
 	{
 		var handlerType = typeof(THandler);
@@ -46,7 +59,8 @@ public class RabbitMessageQueueConfiguration
 			handlerType,
 			queueName,
 			autoAck,
-			dispatchConcurrency,
+			createChannelOptions,
+			serializerRegistry,
 			handlerFactory);
 
 		return this;
@@ -56,7 +70,8 @@ public class RabbitMessageQueueConfiguration
 		Type handlerType,
 		string queueName,
 		bool autoAck = true,
-		ushort dispatchConcurrency = 1,
+		CreateChannelOptions? createChannelOptions = null,
+		IRabbitMQSerializerRegistry? serializerRegistry = null,
 		Delegate? handlerFactory = null)
 	{
 		var typeArguments = handlerType
@@ -76,23 +91,27 @@ public class RabbitMessageQueueConfiguration
 		var registrationType = typeof(SubscribeRegistration<,>).MakeGenericType(typeArguments);
 		var registration = (ISubscribeRegistration?)Activator.CreateInstance(
 			registrationType,
+			m_RegisterName,
 			queueName,
 			autoAck,
-			dispatchConcurrency,
+			createChannelOptions,
+			serializerRegistry,
 			factory)
 			?? throw new InvalidOperationException(
 				$"Unable to create registration for handler type {handlerType.FullName}");
 
-		m_SubscribeRegistrations.Add(registration);
+		_ = Services.AddKeyedSingleton(m_RegisterName, registration);
 
 		return this;
 	}
 
 	public RabbitMessageQueueConfiguration HandleRabbitMessageException(Func<Exception, CancellationToken, Task> handleException)
 	{
-		_ = Services.AddSingleton(sp => ActivatorUtilities.CreateInstance<ExceptionHandler>(
-			sp,
-			handleException));
+		_ = Services.AddKeyedSingleton(
+			m_RegisterName,
+			(sp, _) => ActivatorUtilities.CreateInstance<ExceptionHandler>(
+				sp,
+				handleException));
 
 		return this;
 	}

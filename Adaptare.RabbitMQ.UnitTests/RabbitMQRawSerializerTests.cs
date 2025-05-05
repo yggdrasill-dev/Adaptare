@@ -69,9 +69,9 @@ public class RabbitMQRawSerializerTests
     public void RabbitMQRawSerializer_序列化不支援的型別()
     {
         // Arrange
-        var sut = RabbitMQRawSerializer<string>.Default;
+        var sut = RabbitMQRawSerializer<object>.Default;
 
-        var data = "aaa";
+        var data = new object();
 
         // Act
         _ = Assert.Throws<RabbitMQException>(() => sut.Serialize(data));

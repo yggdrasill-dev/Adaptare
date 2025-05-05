@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using RabbitMQ.Client;
 
 namespace Adaptare.RabbitMQ.Configuration;
 
@@ -10,26 +11,30 @@ internal class SubscribeRegistration<TMessage, THandler> : ISubscribeRegistratio
 	where THandler : IMessageHandler<TMessage>
 {
 	private static readonly Random _Random = new();
+	private readonly string m_RegisterName;
 	private readonly bool m_AutoAck;
-	private readonly ushort m_DispatchConcurrency;
+	private readonly CreateChannelOptions? m_CreateChannelOptions;
+	private readonly IRabbitMQSerializerRegistry? m_RabbitMQSerializerRegistry;
 	private readonly Func<IServiceProvider, THandler> m_HandlerFactory;
 
+	public string Subject { get; }
+
 	public SubscribeRegistration(
+		string registerName,
 		string subject,
 		bool autoAck,
-		ushort dispatchConcurrency,
+		CreateChannelOptions? createChannelOptions,
+		IRabbitMQSerializerRegistry? rabbitMQSerializerRegistry,
 		Func<IServiceProvider, THandler> handlerFactory)
 	{
-		if (string.IsNullOrEmpty(subject))
-			throw new ArgumentException($"'{nameof(subject)}' is not Null or Empty.", nameof(subject));
-
+		ArgumentException.ThrowIfNullOrEmpty(subject, nameof(subject));
+		m_RegisterName = registerName;
 		Subject = subject;
 		m_AutoAck = autoAck;
-		m_DispatchConcurrency = dispatchConcurrency;
+		m_CreateChannelOptions = createChannelOptions;
+		m_RabbitMQSerializerRegistry = rabbitMQSerializerRegistry;
 		m_HandlerFactory = handlerFactory ?? throw new ArgumentNullException(nameof(handlerFactory));
 	}
-
-	public string Subject { get; }
 
 	public ValueTask<IDisposable> SubscribeAsync(
 		IMessageReceiver<RabbitSubscriptionSettings> messageReceiver,
@@ -41,7 +46,7 @@ internal class SubscribeRegistration<TMessage, THandler> : ISubscribeRegistratio
 			{
 				Subject = Subject,
 				AutoAck = m_AutoAck,
-				ConsumerDispatchConcurrency = m_DispatchConcurrency,
+				CreateChannelOptions = m_CreateChannelOptions,
 				EventHandler = (model, args) => HandleMessageAsync(new MessageDataInfo
 				{
 					Args = args,
@@ -85,7 +90,8 @@ internal class SubscribeRegistration<TMessage, THandler> : ISubscribeRegistratio
 			await using (scope.ConfigureAwait(continueOnCapturedContext: false))
 			{
 				var handler = m_HandlerFactory(scope.ServiceProvider);
-				var serializeRegistration = scope.ServiceProvider.GetRequiredService<IRabbitMQSerializerRegistry>();
+				var serializeRegistration = m_RabbitMQSerializerRegistry
+					?? scope.ServiceProvider.GetRequiredKeyedService<IRabbitMQSerializerRegistry>(m_RegisterName);
 				var deserializer = serializeRegistration.GetDeserializer<TMessage>();
 
 				var msg = deserializer.Deserialize(new ReadOnlySequence<byte>(dataInfo.Args.Body));

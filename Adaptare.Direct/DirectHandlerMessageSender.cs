@@ -75,7 +75,7 @@ internal class DirectHandlerMessageSender<TData, TMessageHandler>(
 		await HandleMessageAsync(
 			subject,
 			data,
-			header.ToArray(),
+			[.. header],
 			cancellationToken).ConfigureAwait(false);
 	}
 

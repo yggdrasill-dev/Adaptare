@@ -4,5 +4,9 @@ namespace Adaptare.RabbitMQ;
 
 internal interface IMessageSenderFactory
 {
-	IMessageSender CreateMessageSender(IServiceProvider serviceProvider, string exchangeName, IChannel channel);
+	IMessageSender CreateMessageSender(
+		IServiceProvider serviceProvider,
+		string exchangeName,
+		IChannel channel,
+		IRabbitMQSerializerRegistry rabbitMQSerializerRegistry);
 }

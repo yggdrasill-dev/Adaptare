@@ -70,12 +70,10 @@ public class RabbitMQRawDeserializerTests
     public void RabbitMQRawDeserializer_反序列化不支援的型別()
     {
         // Arrange
-        var sut = RabbitMQRawDeserializer<string>.Default;
-
-        var data = "aaa";
+        var sut = RabbitMQRawDeserializer<object>.Default;
 
         // Act
         _ = Assert.Throws<RabbitMQException>(
-            () => sut.Deserialize(new ReadOnlySequence<byte>(Encoding.UTF8.GetBytes(data))));
+            () => sut.Deserialize(new ReadOnlySequence<byte>([])));
     }
 }

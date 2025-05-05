@@ -5,11 +5,11 @@ namespace Adaptare.RabbitMQ;
 
 record RabbitSubscriptionSettings
 {
-	public string Subject { get; init; } = default!;
+	public required string Subject { get; init; }
 
 	public bool AutoAck { get; init; } = true;
 
-	public ushort ConsumerDispatchConcurrency { get; init; } = 1;
+	public CreateChannelOptions? CreateChannelOptions { get; init; }
 
-	public Func<IChannel, BasicDeliverEventArgs, Task> EventHandler { get; set; } = default!;
+	public required Func<IChannel, BasicDeliverEventArgs, Task> EventHandler { get; init; }
 }

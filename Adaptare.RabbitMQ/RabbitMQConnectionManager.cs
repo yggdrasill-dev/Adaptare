@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Adaptare.RabbitMQ.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -7,39 +8,38 @@ using RabbitMQ.Client.Events;
 namespace Adaptare.RabbitMQ;
 
 internal class RabbitMQConnectionManager(
-	ConnectionFactory connectionFactory,
-	Action<IChannel> setupQueueAndExchange,
+	RabbitMQConnectionOptions rabbitMQConnectionOptions,
 	IServiceProvider serviceProvider,
 	ILogger<RabbitMQConnectionManager> logger)
-	: IDisposable
+	: IMessageReceiver<RabbitSubscriptionSettings>
+	, IDisposable
 	, IAsyncDisposable
-	, IMessageReceiver<RabbitSubscriptionSettings>
+	, IRabbitMQConnectionManager
 {
 	internal static readonly ActivitySource _RabbitMQActivitySource = new("Adaptare.MessageQueue.RabbitMQ");
 
-	private readonly TaskCompletionSource<IConnection> m_ConnectionCompletionSource = new();
-	private IConnection? m_Connection;
+	private readonly TaskCompletionSource m_InitializationCompletionSource = new(TaskCreationOptions.RunContinuationsAsynchronously);
 	private bool m_DisposedValue;
 	private IChannel? m_DeclareChannel;
 
-	public Task<IConnection> GetConnectionAsync(CancellationToken cancellationToken = default)
-		=> m_ConnectionCompletionSource.Task.WaitAsync(cancellationToken);
+	public async Task<IConnection> GetConnectionAsync(CancellationToken cancellationToken = default)
+	{
+		await m_InitializationCompletionSource.Task.ConfigureAwait(false);
+
+		return await rabbitMQConnectionOptions.ConnectionPromise.ConfigureAwait(false);
+	}
 
 	public async Task StartAsync(CancellationToken cancellationToken = default)
 	{
-		m_Connection = await connectionFactory.CreateConnectionAsync(cancellationToken).ConfigureAwait(false);
-		m_Connection.CallbackExceptionAsync += Connection_CallbackExceptionAsync;
-		m_Connection.ConnectionBlockedAsync += Connection_ConnectionBlockedAsync;
-		m_Connection.ConnectionShutdownAsync += Connection_ConnectionShutdownAsync;
-		m_Connection.ConnectionUnblockedAsync += Connection_ConnectionUnblockedAsync;
+		var connection = await rabbitMQConnectionOptions.ConnectionPromise.ConfigureAwait(false);
+		rabbitMQConnectionOptions.ConfigureConnection(connection);
 
-		m_DeclareChannel = await m_Connection.CreateChannelAsync(
+		m_DeclareChannel = await connection.CreateChannelAsync(
 			cancellationToken: cancellationToken).ConfigureAwait(false);
 
-		m_DeclareChannel.CallbackExceptionAsync += MessageQueueChannel_CallbackExceptionAsync;
-		m_DeclareChannel.ChannelShutdownAsync += MessageQueueChannel_ModelShutdownAsync;
+		await rabbitMQConnectionOptions.SetupQueueAndExchange(m_DeclareChannel, cancellationToken).ConfigureAwait(false);
 
-		setupQueueAndExchange(m_DeclareChannel);
+		m_InitializationCompletionSource.SetResult();
 	}
 
 	public async Task StopAsync(CancellationToken cancellationToken = default)
@@ -49,13 +49,6 @@ internal class RabbitMQConnectionManager(
 			await m_DeclareChannel.CloseAsync(cancellationToken).ConfigureAwait(false);
 			await m_DeclareChannel.DisposeAsync().ConfigureAwait(false);
 			m_DeclareChannel = null;
-		}
-
-		if (m_Connection is not null)
-		{
-			await m_Connection.CloseAsync(cancellationToken).ConfigureAwait(false);
-			await m_Connection.DisposeAsync().ConfigureAwait(false);
-			m_Connection = null;
 		}
 	}
 
@@ -69,11 +62,9 @@ internal class RabbitMQConnectionManager(
 
 	public async ValueTask<IDisposable> SubscribeAsync(RabbitSubscriptionSettings settings, CancellationToken cancellationToken = default)
 	{
-		connectionFactory.ConsumerDispatchConcurrency = settings.ConsumerDispatchConcurrency;
-
-		var connection = await connectionFactory.CreateConnectionAsync(
-			cancellationToken).ConfigureAwait(false);
+		var connection = await GetConnectionAsync(cancellationToken).ConfigureAwait(false);
 		var channel = await connection.CreateChannelAsync(
+			settings.CreateChannelOptions,
 			cancellationToken: cancellationToken).ConfigureAwait(false);
 		var consumer = new AsyncEventingBasicConsumer(channel);
 		consumer.ReceivedAsync += (sender, args) => settings.EventHandler(channel, args);
@@ -86,7 +77,6 @@ internal class RabbitMQConnectionManager(
 
 		return new RabbitSubscription(
 			settings.Subject,
-			connection,
 			channel,
 			consumerTag,
 			serviceProvider.GetRequiredService<ILogger<RabbitSubscription>>());
@@ -113,12 +103,6 @@ internal class RabbitMQConnectionManager(
 					disposableChannel.Dispose();
 					m_DeclareChannel = null;
 				}
-
-				if (m_Connection is IDisposable disposableConnection)
-				{
-					disposableConnection.Dispose();
-					m_Connection = null;
-				}
 			}
 
 			m_DisposedValue = true;
@@ -134,49 +118,5 @@ internal class RabbitMQConnectionManager(
 		}
 
 		m_DeclareChannel = null;
-
-		if (m_Connection is not null)
-		{
-			await m_Connection.CloseAsync().ConfigureAwait(false);
-			await m_Connection.DisposeAsync().ConfigureAwait(false);
-		}
-
-		m_Connection = null;
-	}
-
-	private Task MessageQueueChannel_CallbackExceptionAsync(object sender, CallbackExceptionEventArgs args)
-	{
-		logger.LogError(args.Exception, "MessageQueueChannel CallbackExceptionEvent");
-		return Task.CompletedTask;
-	}
-
-	private Task Connection_CallbackExceptionAsync(object? sender, CallbackExceptionEventArgs e)
-	{
-		logger.LogError(e.Exception, "CallbackExceptionEvent");
-		return Task.CompletedTask;
-	}
-
-	private Task Connection_ConnectionBlockedAsync(object? sender, ConnectionBlockedEventArgs e)
-	{
-		logger.LogInformation("ConnectionBlockedEvent, Reason: {reason}", e.Reason);
-		return Task.CompletedTask;
-	}
-
-	private Task Connection_ConnectionShutdownAsync(object? sender, ShutdownEventArgs e)
-	{
-		logger.LogInformation("ConnectionShutdownEvent");
-		return Task.CompletedTask;
-	}
-
-	private Task Connection_ConnectionUnblockedAsync(object? sender, AsyncEventArgs e)
-	{
-		logger.LogInformation("ConnectionUnblockedEvent");
-		return Task.CompletedTask;
-	}
-
-	private Task MessageQueueChannel_ModelShutdownAsync(object? sender, ShutdownEventArgs e)
-	{
-		logger.LogInformation("Declare ChannelShutdownEvent");
-		return Task.CompletedTask;
 	}
 }

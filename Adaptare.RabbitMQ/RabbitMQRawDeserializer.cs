@@ -1,5 +1,7 @@
 ﻿using System.Buffers;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.Marshalling;
+using System.Text;
 
 namespace Adaptare.RabbitMQ;
 
@@ -27,6 +29,7 @@ public class RabbitMQRawDeserializer<T>(IRabbitMQDeserializer<T>? next) : IRabbi
 		{
 			var arr = span.ToArray();
 			result = Unsafe.As<byte[], T>(ref arr);
+
 			return true;
 		}
 
@@ -34,6 +37,7 @@ public class RabbitMQRawDeserializer<T>(IRabbitMQDeserializer<T>? next) : IRabbi
 		{
 			var memory = new Memory<byte>(span.ToArray());
 			result = Unsafe.As<Memory<byte>, T>(ref memory);
+
 			return true;
 		}
 
@@ -41,6 +45,15 @@ public class RabbitMQRawDeserializer<T>(IRabbitMQDeserializer<T>? next) : IRabbi
 		{
 			var memory = new ReadOnlyMemory<byte>(span.ToArray());
 			result = Unsafe.As<ReadOnlyMemory<byte>, T>(ref memory);
+
+			return true;
+		}
+
+		if (typeof(T) == typeof(string))
+		{
+			var text = Encoding.UTF8.GetString(span);
+			result = Unsafe.As<string, T>(ref text);
+
 			return true;
 		}
 

@@ -5,9 +5,9 @@ using Microsoft.Extensions.Logging;
 namespace Adaptare.RabbitMQ;
 
 internal class MessageQueueBackground(
-	IServiceProvider serviceProvider,
 	IEnumerable<ISubscribeRegistration> subscribes,
 	RabbitMQConnectionManager rabbitMQConnectionManager,
+	IServiceProvider serviceProvider,
 	ILogger<MessageQueueBackground> logger)
 	: BackgroundService
 {

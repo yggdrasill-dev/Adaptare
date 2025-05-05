@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using Adaptare.RabbitMQ.UnitTests;
+using Adaptare.RabbitMQ.Configuration;
 
 namespace Adaptare.RabbitMQ.UnitTests;
 
@@ -16,8 +17,10 @@ public partial class DependencyInjectionTests
         sut.AddMessageQueue()
             .AddRabbitMessageQueue(configure => configure
                 .ConfigureConnection(
-                    sp => new ConnectionFactory(),
-                    channel => { }));
+                    sp => new RabbitMQConnectionOptions
+                    {
+                        ConnectionPromise = Task.FromResult(Substitute.For<IConnection>())
+                    }));
     }
 
     [Fact]

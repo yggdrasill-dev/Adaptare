@@ -1,6 +1,4 @@
-﻿using Adaptare.RabbitMQ;
-
-namespace Adaptare.RabbitMQ;
+﻿namespace Adaptare.RabbitMQ;
 
 public interface IRabbitMQSerializerRegistry
 {

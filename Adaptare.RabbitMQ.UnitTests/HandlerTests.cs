@@ -21,10 +21,12 @@ public class HandlerTests
             .BuildServiceProvider();
 
         var sut = new SubscribeRegistration<ReadOnlyMemory<byte>, StubMessageHandler>(
+            string.Empty,
             "test",
             true,
-            1,
-           sp => new StubMessageHandler());
+            new CreateChannelOptions(false, false),
+            null,
+            sp => new StubMessageHandler());
 
         var message = "aaa";
 
