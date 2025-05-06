@@ -14,7 +14,7 @@ internal class MultiplexerMessageSender(
 	private bool m_DisposedValue;
 
 	public async ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
-			string subject,
+		string subject,
 		TMessage data,
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken)
@@ -127,10 +127,12 @@ internal class MultiplexerMessageSender(
 	}
 
 	private async Task<IMessageSender> GetMessageSenderAsync(
-					string subject,
+		string subject,
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken = default)
 	{
+		ObjectDisposedException.ThrowIf(m_DisposedValue, nameof(MultiplexerMessageSender));
+
 		using var activity = _SenderActivitySource.StartActivity($"{nameof(MultiplexerMessageSender)}.{nameof(GetMessageSenderAsync)}");
 		_ = (activity?.AddTag("subject", subject));
 

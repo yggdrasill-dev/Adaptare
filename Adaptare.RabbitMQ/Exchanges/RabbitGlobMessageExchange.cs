@@ -1,4 +1,5 @@
-﻿using DotNet.Globbing;
+﻿using System.Collections.Concurrent;
+using DotNet.Globbing;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
@@ -14,8 +15,7 @@ internal class RabbitGlobMessageExchange
 	private readonly CreateChannelOptions? m_CreateChannelOptions;
 	private readonly IRabbitMQSerializerRegistry? m_RabbitMQSerializerRegistry;
 	private readonly Glob m_Glob;
-	private readonly Dictionary<string, IMessageSender> m_MessageSenders = [];
-	private readonly SemaphoreSlim m_DictionaryLock = new(1, 1);
+	private readonly ConcurrentDictionary<string, IMessageSender> m_MessageSenders = [];
 	private bool m_DisposedValue;
 
 	public RabbitGlobMessageExchange(
@@ -51,26 +51,24 @@ internal class RabbitGlobMessageExchange
 			return messageSender;
 		else
 		{
-			await m_DictionaryLock.WaitAsync(cancellationToken).ConfigureAwait(false);
-			try
-			{
-				if (m_MessageSenders.TryGetValue(subject, out messageSender))
-					return messageSender;
-
-				var sender = messageSenderFactory.CreateMessageSender(
+			var sender = messageSenderFactory.CreateMessageSender(
 					serviceProvider,
 					m_ExchangeName,
 					await connection.CreateChannelAsync(m_CreateChannelOptions, cancellationToken).ConfigureAwait(false),
 					serializerRegistry);
 
-				m_MessageSenders[subject] = sender;
-
-				return sender;
-			}
-			finally
+			if (!m_MessageSenders.TryAdd(subject, sender))
 			{
-				m_DictionaryLock.Release();
+				if (sender is IAsyncDisposable asyncDisposable)
+					await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+				else if (sender is IDisposable disposable)
+					disposable.Dispose();
+
+				return m_MessageSenders.GetValueOrDefault(subject)
+					?? throw new InvalidOperationException($"Failed to get message sender for subject '{subject}'");
 			}
+
+			return sender;
 		}
 	}
 
