@@ -2,12 +2,6 @@
 
 public interface IMessageSender
 {
-	ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
-		string subject,
-		TMessage data,
-		IEnumerable<MessageHeaderValue> header,
-		CancellationToken cancellationToken = default);
-
 	ValueTask PublishAsync<TMessage>(
 		string subject,
 		TMessage data,

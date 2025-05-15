@@ -5,7 +5,7 @@ using NATS.Client.Core;
 using NATS.Client.JetStream;
 using NATS.Client.JetStream.Models;
 
-namespace Adaptare.Nats.Configuration;
+namespace Adaptare.Nats.Configuration.Registrations;
 
 internal class JetStreamHandlerRegistration<TMessage, THandler> : ISubscribeRegistration
 	where THandler : IAcknowledgeMessageHandler<TMessage>
@@ -15,6 +15,8 @@ internal class JetStreamHandlerRegistration<TMessage, THandler> : ISubscribeRegi
 	private readonly INatsSerializerRegistry? m_NatsSerializerRegistry;
 	private readonly Func<IServiceProvider, THandler> m_HandlerFactory;
 
+	public string Subject { get; }
+
 	public JetStreamHandlerRegistration(
 		string subject,
 		string stream,
@@ -22,17 +24,16 @@ internal class JetStreamHandlerRegistration<TMessage, THandler> : ISubscribeRegi
 		INatsSerializerRegistry? natsSerializerRegistry,
 		Func<IServiceProvider, THandler> handlerFactory)
 	{
-		if (string.IsNullOrEmpty(stream))
-			throw new ArgumentException($"'{nameof(stream)}' 不可為 Null 或空白。", nameof(stream));
+		ArgumentException.ThrowIfNullOrEmpty(subject, nameof(subject));
+		ArgumentException.ThrowIfNullOrEmpty(stream, nameof(stream));
+		ArgumentNullException.ThrowIfNull(consumerConfig, nameof(consumerConfig));
 
 		Subject = subject;
 		m_Stream = stream;
-		m_ConsumerConfig = consumerConfig ?? throw new ArgumentNullException(nameof(consumerConfig));
+		m_ConsumerConfig = consumerConfig;
 		m_NatsSerializerRegistry = natsSerializerRegistry;
-		m_HandlerFactory = handlerFactory ?? throw new ArgumentNullException(nameof(handlerFactory));
+		m_HandlerFactory = handlerFactory;
 	}
-
-	public string Subject { get; }
 
 	public async ValueTask<IDisposable?> SubscribeAsync(
 		IMessageReceiver<INatsSubscribe> receiver,
@@ -79,23 +80,19 @@ internal class JetStreamHandlerRegistration<TMessage, THandler> : ISubscribeRegi
 		try
 		{
 			var scope = dataInfo.ServiceProvider.CreateAsyncScope();
-			await using var d = scope.ConfigureAwait(false);
-			var handler = m_HandlerFactory(scope.ServiceProvider);
-			var natsSender = scope.ServiceProvider.GetRequiredService<INatsMessageQueueService>();
+			await using (scope.ConfigureAwait(false))
+			{
+				var handler = m_HandlerFactory(scope.ServiceProvider);
 
-			await handler.HandleAsync(
-				new NatsAcknowledgeMessage<TMessage>(dataInfo.Msg),
-				cts.Token).ConfigureAwait(false);
+				await handler.HandleAsync(
+					new NatsAcknowledgeMessage<TMessage>(dataInfo.Msg),
+					cts.Token).ConfigureAwait(false);
+			}
 		}
 		catch (Exception ex)
 		{
 			_ = (activity?.AddTag("error", true));
 			dataInfo.Logger.LogError(ex, "Handle {Subject} occur error.", Subject);
-
-			foreach (var handler in dataInfo.ServiceProvider.GetServices<ExceptionHandler>())
-				await handler.HandleExceptionAsync(
-					ex,
-					cts.Token).ConfigureAwait(false);
 		}
 	}
 }

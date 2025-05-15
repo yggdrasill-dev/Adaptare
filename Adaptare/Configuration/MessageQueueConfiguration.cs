@@ -3,13 +3,20 @@ using Microsoft.Extensions.Options;
 
 namespace Adaptare.Configuration;
 
-public class MessageQueueConfiguration(IServiceCollection services)
+public class MessageQueueConfiguration
 {
-	private readonly OptionsBuilder<MessageExchangeOptions> m_ExchangeOptionsBuilder = services.AddOptions<MessageExchangeOptions>();
+	private readonly OptionsBuilder<MessageExchangeOptions> m_ExchangeOptionsBuilder;
 
-	public IServiceCollection Services { get; } = services ?? throw new ArgumentNullException(nameof(services));
+	public IServiceCollection Services { get; }
 
-	public string? SessionReplySubject { get; private set; }
+	public MessageQueueConfiguration(IServiceCollection services)
+	{
+		m_ExchangeOptionsBuilder = services.AddOptions<MessageExchangeOptions>();
+
+		Services = services ?? throw new ArgumentNullException(nameof(services));
+
+		Services.AddHostedService<MessageQueueBackground>();
+	}
 
 	public MessageQueueConfiguration AddExchange(IMessageExchange exchange)
 	{
@@ -28,15 +35,6 @@ public class MessageQueueConfiguration(IServiceCollection services)
 	public MessageQueueConfiguration PushExchange(IMessageExchange exchange)
 	{
 		m_ExchangeOptionsBuilder.Configure(options => options.Exchanges.Insert(0, exchange));
-
-		return this;
-	}
-
-	public MessageQueueConfiguration RegisterSessionReplySubject(string subject)
-	{
-		if (string.IsNullOrWhiteSpace(subject))
-			throw new ArgumentException($"'{nameof(subject)}' 不得為 Null 或空白字元。", nameof(subject));
-		SessionReplySubject = subject;
 
 		return this;
 	}

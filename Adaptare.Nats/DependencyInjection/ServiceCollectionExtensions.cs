@@ -1,4 +1,5 @@
-﻿using Adaptare.Configuration;
+﻿using Adaptare;
+using Adaptare.Configuration;
 using Adaptare.Nats;
 using Adaptare.Nats.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -10,8 +11,8 @@ public static class ServiceCollectionExtensions
 	public static IServiceCollection AddFakeNatsMessageQueue(this IServiceCollection services)
 	{
 		foreach (var desc in services.Where(
-			desc => desc.ServiceType == typeof(IHostedService)
-				&& desc.ImplementationType == typeof(MessageQueueBackground)).ToArray())
+			desc => desc.ServiceType == typeof(IMessageQueueBackgroundRegistration)
+				&& desc.ImplementationType == typeof(NatsBackgroundRegistration)).ToArray())
 			_ = services.Remove(desc);
 
 		return services
@@ -22,8 +23,14 @@ public static class ServiceCollectionExtensions
 	public static MessageQueueConfiguration AddNatsMessageQueue(
 		this MessageQueueConfiguration configuration,
 		Action<NatsMessageQueueConfiguration> configure)
+		=> AddNatsMessageQueue(configuration, string.Empty, configure);
+
+	public static MessageQueueConfiguration AddNatsMessageQueue(
+		this MessageQueueConfiguration configuration,
+		string registerName,
+		Action<NatsMessageQueueConfiguration> configure)
 	{
-		var natsConfiguration = new NatsMessageQueueConfiguration(configuration);
+		var natsConfiguration = new NatsMessageQueueConfiguration(registerName, configuration);
 
 		configure(natsConfiguration);
 

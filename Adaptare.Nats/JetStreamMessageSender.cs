@@ -9,18 +9,11 @@ namespace Adaptare.Nats;
 internal class JetStreamMessageSender(
 	INatsSerializerRegistry? natsSerializerRegistry,
 	INatsJSContext natsJSContext,
-	ILogger<JetStreamMessageSender> logger) 
+	ILogger<JetStreamMessageSender> logger)
 	: IMessageSender
 {
 	private readonly INatsJSContext m_NatsJSContext = natsJSContext ?? throw new ArgumentNullException(nameof(natsJSContext));
 	private readonly ILogger<JetStreamMessageSender> m_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-	public ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
-		string subject,
-		TMessage data,
-		IEnumerable<MessageHeaderValue> header,
-		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
 
 	public async ValueTask PublishAsync<TMessage>(
 		string subject,

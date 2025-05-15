@@ -13,13 +13,6 @@ internal class RabbitMessageSender(
 {
 	private bool m_DisposedValue;
 
-	public ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
-		string subject,
-		TMessage data,
-		IEnumerable<MessageHeaderValue> header,
-		CancellationToken cancellationToken)
-		=> throw new NotSupportedException();
-
 	public async ValueTask PublishAsync<TMessage>(
 		string subject,
 		TMessage data,

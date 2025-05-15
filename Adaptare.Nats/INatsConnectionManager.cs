@@ -11,8 +11,7 @@ internal interface INatsConnectionManager
 
 	IMessageSender CreateMessageSender(
 		IServiceProvider serviceProvider,
-		INatsSerializerRegistry? natsSerializerRegistry,
-		string? sessionReplySubject);
+		INatsSerializerRegistry? natsSerializerRegistry);
 
 	IMessageSender CreateJetStreamMessageSender(
 		IServiceProvider serviceProvider,

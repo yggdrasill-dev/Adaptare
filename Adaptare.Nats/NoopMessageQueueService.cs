@@ -4,13 +4,6 @@ namespace Adaptare.Nats;
 
 internal class NoopMessageQueueService : INatsMessageQueueService, IMessageSender
 {
-	public ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
-		string subject,
-		TMessage data,
-		IEnumerable<MessageHeaderValue> header,
-		CancellationToken cancellationToken)
-		=> throw new NotImplementedException();
-
 	public ValueTask PublishAsync<TMessage>(
 		string subject,
 		TMessage data,

@@ -30,10 +30,10 @@ public static class TraceContextPropagator
 			values = default;
 		}
 
+		activityContext = default;
+
 		try
 		{
-			activityContext = default;
-
 			DistributedContextPropagator.Current.ExtractTraceIdAndState(
 				carrier,
 				ContextGetter,

@@ -1,20 +1,19 @@
 ﻿using Adaptare.RabbitMQ.Configuration;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Adaptare.RabbitMQ;
 
-internal class MessageQueueBackground(
+internal class RabbitMQBackgroundRegistration(
 	IEnumerable<ISubscribeRegistration> subscribes,
 	RabbitMQConnectionManager rabbitMQConnectionManager,
 	IServiceProvider serviceProvider,
-	ILogger<MessageQueueBackground> logger)
-	: BackgroundService
+	ILogger<RabbitMQBackgroundRegistration> logger)
+	: IMessageQueueBackgroundRegistration
 {
-	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+	public async Task ExecuteAsync(CancellationToken cancellationToken = default)
 	{
 		await rabbitMQConnectionManager.StartAsync(
-			stoppingToken).ConfigureAwait(false);
+			cancellationToken).ConfigureAwait(false);
 
 		var subscriptions = new List<IDisposable>();
 
@@ -24,9 +23,9 @@ internal class MessageQueueBackground(
 					rabbitMQConnectionManager,
 					serviceProvider,
 					logger,
-					stoppingToken).ConfigureAwait(false));
+					cancellationToken).ConfigureAwait(false));
 
-		_ = stoppingToken.Register(() =>
+		_ = cancellationToken.Register(() =>
 		{
 			rabbitMQConnectionManager.StopAsync().Wait();
 

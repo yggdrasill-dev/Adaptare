@@ -7,21 +7,9 @@ namespace Adaptare.Direct;
 internal class DirectHandlerMessageSender<TData, TMessageHandler>(
 	Func<IServiceProvider, TMessageHandler> messageHandlerFactory,
 	IServiceProvider serviceProvider,
-	ILogger<DirectHandlerMessageSender<TData, TMessageHandler>> logger)
-	: IMessageSender
+	ILogger<DirectHandlerMessageSender<TData, TMessageHandler>> logger) : IMessageSender
 	where TMessageHandler : class, IMessageHandler<TData>
 {
-	private readonly ILogger<DirectHandlerMessageSender<TData, TMessageHandler>> m_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	private readonly IServiceProvider m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-	private readonly Func<IServiceProvider, TMessageHandler> m_MessageHandlerFactory = messageHandlerFactory ?? throw new ArgumentNullException(nameof(messageHandlerFactory));
-
-	public ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
-		string subject,
-		TMessage data,
-		IEnumerable<MessageHeaderValue> header,
-		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
-
 	public ValueTask PublishAsync<TMessage>(
 		string subject,
 		TMessage data,
@@ -42,9 +30,9 @@ internal class DirectHandlerMessageSender<TData, TMessageHandler>(
 					{
 						var ex = t.Exception!;
 
-						m_Logger.LogError(ex, "Handle {subject} occur error.", subject);
+						logger.LogError(ex, "Handle {subject} occur error.", subject);
 
-						foreach (var handler in m_ServiceProvider.GetServices<ExceptionHandler>())
+						foreach (var handler in serviceProvider.GetServices<ExceptionHandler>())
 							await handler.HandleExceptionAsync(
 								ex,
 								cancellationToken).ConfigureAwait(false);
@@ -90,10 +78,10 @@ internal class DirectHandlerMessageSender<TData, TMessageHandler>(
 		_ = (activity?.AddTag("mq", "Direct")
 			.AddTag("handler", typeof(TMessageHandler).Name));
 
-		var scope = m_ServiceProvider.CreateAsyncScope();
+		var scope = serviceProvider.CreateAsyncScope();
 		await using (scope.ConfigureAwait(false))
 		{
-			var handler = m_MessageHandlerFactory(scope.ServiceProvider);
+			var handler = messageHandlerFactory(scope.ServiceProvider);
 
 			if (data is TData messageData)
 				await handler.HandleAsync(

@@ -2,17 +2,6 @@
 
 public static class MessageSenderExtensions
 {
-	public static ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
-		this IMessageSender messageSender,
-		string subject,
-		TMessage data,
-		CancellationToken cancellationToken = default)
-		=> messageSender.AskAsync<TMessage, TReply>(
-			subject,
-			data,
-			[],
-			cancellationToken);
-
 	public static ValueTask PublishAsync<TMessage>(
 		this IMessageSender messageSender,
 		string subject,

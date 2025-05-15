@@ -12,8 +12,7 @@ internal class NoopConnectionManager : INatsConnectionManager
 
 	public IMessageSender CreateMessageSender(
 		IServiceProvider serviceProvider,
-		INatsSerializerRegistry? natsSerializerRegistry,
-		string? sessionReplySubject)
+		INatsSerializerRegistry? natsSerializerRegistry)
 		=> serviceProvider.GetRequiredService<NoopMessageQueueService>();
 
 	public IMessageSender CreateJetStreamMessageSender(

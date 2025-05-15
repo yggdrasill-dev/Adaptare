@@ -3,13 +3,12 @@
 namespace Adaptare.Nats;
 
 internal class NatsMessageQueueService(
-	INatsConnectionManager natsConnectionManager) : INatsMessageQueueService
+	INatsConnectionManager natsConnectionManager) 
+	: INatsMessageQueueService
 {
-	private readonly INatsConnectionManager m_NatsConnectionManager = natsConnectionManager ?? throw new ArgumentNullException(nameof(natsConnectionManager));
-
 	public async ValueTask RegisterStreamAsync(StreamConfig config, CancellationToken cancellationToken = default)
 	{
-		var js = m_NatsConnectionManager.CreateJsContext();
+		var js = natsConnectionManager.CreateJsContext();
 
 		_ = await js.ListStreamsAsync(cancellationToken: cancellationToken)
 			.AnyAsync(stream => stream.Info.Config.Name == config.Name, cancellationToken)
@@ -23,5 +22,5 @@ internal class NatsMessageQueueService(
 	}
 
 	public ValueTask<IDisposable> SubscribeAsync(INatsSubscribe settings, CancellationToken cancellationToken = default)
-		=> settings.SubscribeAsync(m_NatsConnectionManager, cancellationToken);
+		=> settings.SubscribeAsync(natsConnectionManager, cancellationToken);
 }

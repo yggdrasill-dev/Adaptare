@@ -2,13 +2,6 @@
 
 internal class NoopMessageSender : IMessageSender
 {
-	public ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
-		string subject,
-		TMessage data,
-		IEnumerable<MessageHeaderValue> header,
-		CancellationToken cancellationToken)
-		=> throw new NotSupportedException();
-
 	public ValueTask PublishAsync<TMessage>(
 		string subject,
 		TMessage data,

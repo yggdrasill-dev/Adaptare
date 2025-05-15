@@ -13,26 +13,6 @@ internal class MultiplexerMessageSender(
 
 	private bool m_DisposedValue;
 
-	public async ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
-		string subject,
-		TMessage data,
-		IEnumerable<MessageHeaderValue> header,
-		CancellationToken cancellationToken)
-	{
-		using var activity = _SenderActivitySource.StartActivity($"{nameof(MultiplexerMessageSender)}.{nameof(AskAsync)}");
-		_ = (activity?.AddTag("subject", subject));
-
-		var sender = await GetMessageSenderAsync(subject, header, cancellationToken).ConfigureAwait(false);
-
-		cancellationToken.ThrowIfCancellationRequested();
-
-		return await sender.AskAsync<TMessage, TReply>(
-			subject,
-			data,
-			header,
-			cancellationToken).ConfigureAwait(false);
-	}
-
 	public async ValueTask PublishAsync<TMessage>(
 		string subject,
 		TMessage data,

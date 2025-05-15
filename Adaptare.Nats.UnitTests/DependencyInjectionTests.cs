@@ -188,54 +188,6 @@ public class DependencyInjectionTests
     }
 
     [Fact]
-    public void 註冊一個MessageSession()
-    {
-        // Arrange
-        var sut = new ServiceCollection();
-
-        // Act
-        sut.AddMessageQueue()
-            .AddNatsMessageQueue(config => config
-                .AddSession<StubMessageSession<string>>("a.b.c"));
-    }
-
-    [Fact]
-    public void 註冊一個Group的MessageSession()
-    {
-        // Arrange
-        var sut = new ServiceCollection();
-
-        // Act
-        sut.AddMessageQueue()
-            .AddNatsMessageQueue(config => config
-                .AddSession<string, StubMessageSession<string>>("a.b.c", "group"));
-    }
-
-    [Fact]
-    public void 以MessageSessionType註冊MessageSession()
-    {
-        // Arrange
-        var sut = new ServiceCollection();
-
-        // Act
-        sut.AddMessageQueue()
-            .AddNatsMessageQueue(config => config
-                .AddSession(typeof(StubMessageSession<string>), "a.b.c"));
-    }
-
-    [Fact]
-    public void 以MessageSessionType註冊Group的MessageSession()
-    {
-        // Arrange
-        var sut = new ServiceCollection();
-
-        // Act
-        sut.AddMessageQueue()
-            .AddNatsMessageQueue(config => config
-                .AddSession(typeof(StubMessageSession<string>), "a.b.c", "group"));
-    }
-
-    [Fact]
     public void 註冊一個JetStreamHandler()
     {
         // Arrange

@@ -10,9 +10,20 @@ public static class MessageQueueConfigurationExtensions
 		this MessageQueueConfiguration configuration,
 		string glob,
 		INatsSerializerRegistry? natsSerializerRegistry = null)
-		=> configuration.AddExchange(new NatsGlobMessageExchange(
+		=> AddNatsGlobPatternExchange(
+			configuration,
+			string.Empty,
 			glob,
-			configuration.SessionReplySubject,
+			natsSerializerRegistry);
+
+	public static MessageQueueConfiguration AddNatsGlobPatternExchange(
+		this MessageQueueConfiguration configuration,
+		string registerName,
+		string glob,
+		INatsSerializerRegistry? natsSerializerRegistry = null)
+		=> configuration.AddExchange(new NatsGlobMessageExchange(
+			registerName,
+			glob,
 			natsSerializerRegistry));
 
 	public static MessageQueueConfiguration AddNatsJetStreamGlobPatternExchange(

@@ -5,24 +5,21 @@ using NATS.Client.JetStream;
 
 namespace Adaptare.Nats;
 
-internal class NatsConnectionManager(NatsConnection natsConnection) : INatsConnectionManager
+internal class NatsConnectionManager(
+	NatsConnection natsConnection)
+	: INatsConnectionManager
 {
-	private readonly NatsConnection m_NatsConnection = natsConnection ?? throw new ArgumentNullException(nameof(natsConnection));
-
-	public INatsConnection Connection => m_NatsConnection;
+	public INatsConnection Connection => natsConnection;
 
 	public INatsJSContext CreateJsContext()
-		=> new NatsJSContext(m_NatsConnection);
+		=> new NatsJSContext(natsConnection);
 
 	public IMessageSender CreateMessageSender(
 		IServiceProvider serviceProvider,
-		INatsSerializerRegistry? natsSerializerRegistry,
-		string? sessionReplySubject)
+		INatsSerializerRegistry? natsSerializerRegistry)
 		=> new NatsMessageSender(
 			natsSerializerRegistry,
-			sessionReplySubject,
 			Connection,
-			serviceProvider.GetRequiredService<IReplyPromiseStore>(),
 			serviceProvider.GetRequiredService<ILogger<NatsMessageSender>>());
 
 	public IMessageSender CreateJetStreamMessageSender(

@@ -16,8 +16,7 @@ public static class ServiceCollectionExtensions
 
 		_ = configuration.Services
 			.AddSingleton(typeof(DirectHandlerMessageSender<,>))
-			.AddSingleton(typeof(DirectProcessorMessageSender<,,>))
-			.AddSingleton(typeof(DirectSessionMessageSender<,>));
+			.AddSingleton(typeof(DirectProcessorMessageSender<,,>));
 
 		return configuration;
 	}

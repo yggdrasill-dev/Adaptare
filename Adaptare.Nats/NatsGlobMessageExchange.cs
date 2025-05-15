@@ -5,8 +5,8 @@ using NATS.Client.Core;
 namespace Adaptare.Nats;
 
 internal class NatsGlobMessageExchange(
+	string registerName,
 	string pattern,
-	string? sessionReplySubject,
 	INatsSerializerRegistry? natsSerializerRegistry)
 	: IMessageExchange
 {
@@ -17,12 +17,11 @@ internal class NatsGlobMessageExchange(
 		IServiceProvider serviceProvider,
 		CancellationToken cancellationToken = default)
 	{
-		var connectionMgr = serviceProvider.GetRequiredService<INatsConnectionManager>();
+		var connectionMgr = serviceProvider.GetRequiredKeyedService<INatsConnectionManager>(registerName);
 
 		return await Task.FromResult(connectionMgr.CreateMessageSender(
 			serviceProvider,
-			natsSerializerRegistry,
-			sessionReplySubject)).ConfigureAwait(false);
+			natsSerializerRegistry)).ConfigureAwait(false);
 	}
 
 	public async ValueTask<bool> MatchAsync(

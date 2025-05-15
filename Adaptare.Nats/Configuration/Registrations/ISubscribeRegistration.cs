@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace Adaptare.Nats.Configuration;
+namespace Adaptare.Nats.Configuration.Registrations;
 
 internal interface ISubscribeRegistration
 {

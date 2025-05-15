@@ -77,47 +77,4 @@ public class DirectMessageQueueConfiguration(MessageQueueConfiguration messageQu
 
 		return this;
 	}
-
-	public DirectMessageQueueConfiguration AddSession<TSession>(string subject, Func<IServiceProvider, TSession>? sessionFactory = null)
-	{
-		var sessionType = typeof(TSession);
-
-		AddSession(sessionType, subject, sessionFactory);
-
-		return this;
-	}
-
-	public DirectMessageQueueConfiguration AddSession(Type sessionType, string subject, Delegate? sessionFactory = null)
-	{
-		var typeArguments = sessionType
-			.GetInterfaces()
-			.Where(t => t.GetGenericTypeDefinition() == typeof(IMessageSession<>))
-			.Take(1)
-			.SelectMany(t => t.GetGenericArguments())
-			.Append(sessionType)
-			.ToArray();
-
-		var factory = sessionFactory
-			?? typeof(DefaultHandlerFactory<>)
-				.MakeGenericType(sessionType)
-				.GetField("Default")!
-				.GetValue(null);
-
-		var registrationType = typeof(SessionRegistration<,>).MakeGenericType(typeArguments);
-		var registration = (ISubscribeRegistration?)Activator.CreateInstance(registrationType, Glob.Parse(subject), factory)
-			?? throw new InvalidOperationException($"Unable to create a registration for processor type {sessionType.FullName}");
-
-		_SubscribeRegistrations.Add(registration);
-
-		return this;
-	}
-
-	public DirectMessageQueueConfiguration HandleDirectMessageException(Func<Exception, CancellationToken, Task> handleException)
-	{
-		_ = Services.AddSingleton(sp => ActivatorUtilities.CreateInstance<ExceptionHandler>(
-			sp,
-			handleException));
-
-		return this;
-	}
 }

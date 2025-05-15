@@ -9,16 +9,6 @@ internal class DirectProcessorMessageSender<TData, TResult, TMessageProcessor>(
 	: IMessageSender
 	where TMessageProcessor : class, IMessageProcessor<TData, TResult>
 {
-	private readonly Func<IServiceProvider, TMessageProcessor> m_ProcessorFactory = processorFactory ?? throw new ArgumentNullException(nameof(processorFactory));
-	private readonly IServiceProvider m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-
-	public ValueTask<Answer<TReply>> AskAsync<TMessage, TReply>(
-		string subject,
-		TMessage data,
-		IEnumerable<MessageHeaderValue> header,
-		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
-
 	public ValueTask PublishAsync<TMessage>(
 		string subject,
 		TMessage data,
@@ -39,10 +29,10 @@ internal class DirectProcessorMessageSender<TData, TResult, TMessageProcessor>(
 		_ = (activity?.AddTag("mq", "Direct")
 			.AddTag("handler", typeof(TMessageProcessor).Name));
 
-		var scope = m_ServiceProvider.CreateAsyncScope();
+		var scope = serviceProvider.CreateAsyncScope();
 		await using (scope.ConfigureAwait(false))
 		{
-			var handler = m_ProcessorFactory(scope.ServiceProvider);
+			var handler = processorFactory(scope.ServiceProvider);
 
 			if (data is TData messageData)
 			{

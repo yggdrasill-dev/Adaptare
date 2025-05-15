@@ -62,28 +62,4 @@ public class DependencyInjectionTests
 			.AddDirectMessageQueue(config => config
 				.AddProcessor(typeof(StubMessageProcessor<string, string>), "a.b.c"));
 	}
-
-	[Fact]
-	public void DependencyInjection_註冊一個MessageSession()
-	{
-		// Arrange
-		var sut = new ServiceCollection();
-
-		// Act
-		sut.AddMessageQueue()
-			.AddDirectMessageQueue(config => config
-				.AddSession<StubMessageSession<string>>("a.b.c"));
-	}
-
-	[Fact]
-	public void DependencyInjection_以MessageSessionType註冊MessageSession()
-	{
-		// Arrange
-		var sut = new ServiceCollection();
-
-		// Act
-		sut.AddMessageQueue()
-			.AddDirectMessageQueue(config => config
-				.AddSession(typeof(StubMessageSession<string>), "a.b.c"));
-	}
 }

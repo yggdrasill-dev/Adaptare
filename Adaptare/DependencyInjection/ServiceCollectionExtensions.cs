@@ -12,7 +12,6 @@ public static class ServiceCollectionExtensions
 		var configuration = new MessageQueueConfiguration(services);
 
 		_ = services
-			.AddSingleton<IReplyPromiseStore, ReplyPromiseStore>()
 			.AddSingleton<IMessageSender>(
 				sp => new MultiplexerMessageSender(
 					sp,
