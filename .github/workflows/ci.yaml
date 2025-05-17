@@ -25,7 +25,6 @@ jobs:
       uses: dorny/test-reporter@v2
       if: success() || failure()    # run this step even if previous step failed
       with:
-        artifact: TestResults
         name: Dotnet Tests            # Name of the check run which will be created
         path: '**/TestResults/*.trx'    # Path to test results
         reporter: dotnet-trx
