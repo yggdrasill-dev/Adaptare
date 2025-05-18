@@ -12,14 +12,14 @@ public static class MessageQueueConfigurationExtensions
 		string glob,
 		string exchangeName,
 		CreateChannelOptions? createChannelOptions = null,
-		IRabbitMQSerializerRegistry? rabbitMQSerializerRegistry = null)
+		IRabbitMQSerializerRegistry? serializerRegistry = null)
 		=> AddRabbitGlobPatternExchange(
 			configuration,
 			string.Empty,
 			glob,
 			exchangeName,
 			createChannelOptions,
-			rabbitMQSerializerRegistry);
+			serializerRegistry);
 
 	public static MessageQueueConfiguration AddRabbitGlobPatternExchange(
 		this MessageQueueConfiguration configuration,
@@ -27,11 +27,11 @@ public static class MessageQueueConfigurationExtensions
 		string glob,
 		string exchangeName,
 		CreateChannelOptions? createChannelOptions = null,
-		IRabbitMQSerializerRegistry? rabbitMQSerializerRegistry = null)
+		IRabbitMQSerializerRegistry? serializerRegistry = null)
 		=> configuration.AddExchange(new RabbitGlobMessageExchange(
 			registerName,
 			glob,
 			exchangeName,
 			createChannelOptions,
-			rabbitMQSerializerRegistry));
+			serializerRegistry));
 }

@@ -12,7 +12,7 @@ internal class JetStreamHandlerRegistration<TMessage, THandler> : ISubscribeRegi
 {
 	private readonly string m_Stream;
 	private readonly ConsumerConfig m_ConsumerConfig;
-	private readonly INatsSerializerRegistry? m_NatsSerializerRegistry;
+	private readonly INatsSerializerRegistry? m_SerializerRegistry;
 	private readonly Func<IServiceProvider, THandler> m_HandlerFactory;
 
 	public string Subject { get; }
@@ -21,7 +21,7 @@ internal class JetStreamHandlerRegistration<TMessage, THandler> : ISubscribeRegi
 		string subject,
 		string stream,
 		ConsumerConfig consumerConfig,
-		INatsSerializerRegistry? natsSerializerRegistry,
+		INatsSerializerRegistry? serializerRegistry,
 		Func<IServiceProvider, THandler> handlerFactory)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(subject, nameof(subject));
@@ -31,7 +31,7 @@ internal class JetStreamHandlerRegistration<TMessage, THandler> : ISubscribeRegi
 		Subject = subject;
 		m_Stream = stream;
 		m_ConsumerConfig = consumerConfig;
-		m_NatsSerializerRegistry = natsSerializerRegistry;
+		m_SerializerRegistry = serializerRegistry;
 		m_HandlerFactory = handlerFactory;
 	}
 
@@ -51,7 +51,7 @@ internal class JetStreamHandlerRegistration<TMessage, THandler> : ISubscribeRegi
 						logger,
 						serviceProvider),
 					ct),
-				m_NatsSerializerRegistry?.GetDeserializer<TMessage>()),
+				m_SerializerRegistry?.GetDeserializer<TMessage>()),
 			cancellationToken).ConfigureAwait(false);
 
 	private async ValueTask HandleMessageAsync(MessageDataInfo<NatsJSMsg<TMessage>> dataInfo, CancellationToken cancellationToken)

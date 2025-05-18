@@ -13,7 +13,7 @@ internal class RabbitGlobMessageExchange
 	private readonly string m_RegisterName;
 	private readonly string m_ExchangeName;
 	private readonly CreateChannelOptions? m_CreateChannelOptions;
-	private readonly IRabbitMQSerializerRegistry? m_RabbitMQSerializerRegistry;
+	private readonly IRabbitMQSerializerRegistry? m_SerializerRegistry;
 	private readonly Glob m_Glob;
 	private readonly ConcurrentDictionary<string, IMessageSender> m_MessageSenders = [];
 	private bool m_DisposedValue;
@@ -23,7 +23,7 @@ internal class RabbitGlobMessageExchange
 		string pattern,
 		string exchangeName,
 		CreateChannelOptions? createChannelOptions,
-		IRabbitMQSerializerRegistry? rabbitMQSerializerRegistry)
+		IRabbitMQSerializerRegistry? serializerRegistry)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(exchangeName, nameof(exchangeName));
 
@@ -31,7 +31,7 @@ internal class RabbitGlobMessageExchange
 		m_RegisterName = registerName;
 		m_ExchangeName = exchangeName;
 		m_CreateChannelOptions = createChannelOptions;
-		m_RabbitMQSerializerRegistry = rabbitMQSerializerRegistry;
+		m_SerializerRegistry = serializerRegistry;
 	}
 
 	public async ValueTask<IMessageSender> GetMessageSenderAsync(
@@ -43,7 +43,7 @@ internal class RabbitGlobMessageExchange
 
 		var connectionManager = serviceProvider.GetRequiredKeyedService<RabbitMQConnectionManager>(m_RegisterName);
 		var connection = await connectionManager.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
-		var serializerRegistry = m_RabbitMQSerializerRegistry
+		var serializerRegistry = m_SerializerRegistry
 			?? serviceProvider.GetRequiredKeyedService<IRabbitMQSerializerRegistry>(m_RegisterName);
 		var messageSenderFactory = serviceProvider.GetRequiredService<IMessageSenderFactory>();
 

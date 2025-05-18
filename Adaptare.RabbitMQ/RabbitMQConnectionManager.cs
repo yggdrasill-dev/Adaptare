@@ -32,7 +32,6 @@ internal class RabbitMQConnectionManager(
 	public async Task StartAsync(CancellationToken cancellationToken = default)
 	{
 		var connection = await rabbitMQConnectionOptions.ConnectionPromise.ConfigureAwait(false);
-		rabbitMQConnectionOptions.ConfigureConnection(connection);
 
 		m_DeclareChannel = await connection.CreateChannelAsync(
 			cancellationToken: cancellationToken).ConfigureAwait(false);

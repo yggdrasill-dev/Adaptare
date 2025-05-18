@@ -9,6 +9,6 @@ internal class RabbitMessageSenderFactory : IMessageSenderFactory
 		IServiceProvider serviceProvider,
 		string exchangeName,
 		IChannel channel,
-		IRabbitMQSerializerRegistry rabbitMQSerializerRegistry)
-		=> ActivatorUtilities.CreateInstance<RabbitMessageSender>(serviceProvider, exchangeName, channel, rabbitMQSerializerRegistry);
+		IRabbitMQSerializerRegistry serializerRegistry)
+		=> ActivatorUtilities.CreateInstance<RabbitMessageSender>(serviceProvider, exchangeName, channel, serializerRegistry);
 }

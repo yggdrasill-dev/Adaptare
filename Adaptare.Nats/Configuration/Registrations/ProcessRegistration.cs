@@ -8,21 +8,21 @@ internal class ProcessRegistration<TMessage, TReply, TProcessor>
 	, ISubscribeRegistration
 	where TProcessor : IMessageProcessor<TMessage, TReply>
 {
-	private readonly INatsSerializerRegistry? m_NatsSerializerRegistry;
+	private readonly INatsSerializerRegistry? m_SerializerRegistry;
 
 	public override string Subject { get; }
 
 	public ProcessRegistration(
 		string registerName,
 		string subject,
-		INatsSerializerRegistry? natsSerializerRegistry,
+		INatsSerializerRegistry? serializerRegistry,
 		Func<IServiceProvider, TProcessor> processorFactory)
 		: base(registerName, processorFactory)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(subject, nameof(subject));
 
 		Subject = subject;
-		m_NatsSerializerRegistry = natsSerializerRegistry;
+		m_SerializerRegistry = serializerRegistry;
 	}
 
 	public async ValueTask<IDisposable?> SubscribeAsync(
@@ -39,6 +39,6 @@ internal class ProcessRegistration<TMessage, TReply, TProcessor>
 						logger,
 						serviceProvider),
 					ct),
-				m_NatsSerializerRegistry?.GetDeserializer<TMessage>()),
+				m_SerializerRegistry?.GetDeserializer<TMessage>()),
 			cancellationToken).ConfigureAwait(false);
 }

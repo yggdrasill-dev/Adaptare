@@ -38,12 +38,12 @@ public class NatsMessageQueueConfiguration(
 
 	public NatsMessageQueueConfiguration AddHandler<THandler>(
 		string subject,
-		INatsSerializerRegistry? natsSerializerRegistry = null,
+		INatsSerializerRegistry? serializerRegistry = null,
 		Func<IServiceProvider, THandler>? handlerFactory = null)
 	{
 		var handlerType = typeof(THandler);
 
-		AddHandler(handlerType, subject, natsSerializerRegistry, handlerFactory);
+		AddHandler(handlerType, subject, serializerRegistry, handlerFactory);
 
 		return this;
 	}
@@ -51,7 +51,7 @@ public class NatsMessageQueueConfiguration(
 	public NatsMessageQueueConfiguration AddHandler(
 		Type handlerType,
 		string subject,
-		INatsSerializerRegistry? natsSerializerRegistry = null,
+		INatsSerializerRegistry? serializerRegistry = null,
 		Delegate? handlerFactory = null)
 	{
 		var typeArguments = handlerType
@@ -73,7 +73,7 @@ public class NatsMessageQueueConfiguration(
 			registrationType,
 			registerName,
 			subject,
-			natsSerializerRegistry,
+			serializerRegistry,
 			factory)
 			?? throw new InvalidOperationException($"Unable to create a registration for handler type {handlerType.FullName}");
 
@@ -85,12 +85,12 @@ public class NatsMessageQueueConfiguration(
 	public NatsMessageQueueConfiguration AddHandler<THandler>(
 		string subject,
 		string group,
-		INatsSerializerRegistry? natsSerializerRegistry = null,
+		INatsSerializerRegistry? serializerRegistry = null,
 		Func<IServiceProvider, THandler>? handlerFactory = null)
 	{
 		var handlerType = typeof(THandler);
 
-		AddHandler(handlerType, subject, group, natsSerializerRegistry, handlerFactory);
+		AddHandler(handlerType, subject, group, serializerRegistry, handlerFactory);
 
 		return this;
 	}
@@ -99,7 +99,7 @@ public class NatsMessageQueueConfiguration(
 		Type handlerType,
 		string subject,
 		string group,
-		INatsSerializerRegistry? natsSerializerRegistry = null,
+		INatsSerializerRegistry? serializerRegistry = null,
 		Delegate? handlerFactory = null)
 	{
 		var typeArguments = handlerType
@@ -122,7 +122,7 @@ public class NatsMessageQueueConfiguration(
 			registerName,
 			subject,
 			group,
-			natsSerializerRegistry,
+			serializerRegistry,
 			factory)
 			?? throw new InvalidOperationException($"Unable to create a registration for handler type {handlerType.FullName}");
 
@@ -135,7 +135,7 @@ public class NatsMessageQueueConfiguration(
 		string subject,
 		string stream,
 		ConsumerConfig consumerConfig,
-		INatsSerializerRegistry? natsSerializerRegistry = null,
+		INatsSerializerRegistry? serializerRegistry = null,
 		Func<IServiceProvider, THandler>? handlerFactory = null)
 	{
 		var handlerType = typeof(THandler);
@@ -145,7 +145,7 @@ public class NatsMessageQueueConfiguration(
 			subject,
 			stream,
 			consumerConfig,
-			natsSerializerRegistry,
+			serializerRegistry,
 			handlerFactory);
 
 		return this;
@@ -156,7 +156,7 @@ public class NatsMessageQueueConfiguration(
 		string subject,
 		string stream,
 		ConsumerConfig consumerConfig,
-		INatsSerializerRegistry? natsSerializerRegistry = null,
+		INatsSerializerRegistry? serializerRegistry = null,
 		Delegate? handlerFactory = null)
 	{
 		var typeArguments = handlerType
@@ -180,7 +180,7 @@ public class NatsMessageQueueConfiguration(
 			subject,
 			stream,
 			consumerConfig,
-			natsSerializerRegistry,
+			serializerRegistry,
 			factory)
 			?? throw new InvalidOperationException($"Unable to create a registration for handler type {handlerType.FullName}");
 
@@ -191,7 +191,7 @@ public class NatsMessageQueueConfiguration(
 
 	public NatsMessageQueueConfiguration AddProcessor<TProcessor>(
 		string subject,
-		INatsSerializerRegistry? natsSerializerRegistry = null,
+		INatsSerializerRegistry? serializerRegistry = null,
 		Func<IServiceProvider, TProcessor>? processorFactory = null)
 	{
 		var processorType = typeof(TProcessor);
@@ -199,7 +199,7 @@ public class NatsMessageQueueConfiguration(
 		AddProcessor(
 			processorType,
 			subject,
-			natsSerializerRegistry,
+			serializerRegistry,
 			processorFactory);
 
 		return this;
@@ -208,7 +208,7 @@ public class NatsMessageQueueConfiguration(
 	public NatsMessageQueueConfiguration AddProcessor(
 		Type processorType,
 		string subject,
-		INatsSerializerRegistry? natsSerializerRegistry = null,
+		INatsSerializerRegistry? serializerRegistry = null,
 		Delegate? processorFactory = null)
 	{
 		var typeArguments = processorType
@@ -230,7 +230,7 @@ public class NatsMessageQueueConfiguration(
 			registrationType,
 			registerName,
 			subject,
-			natsSerializerRegistry,
+			serializerRegistry,
 			factory)
 			?? throw new InvalidOperationException($"Unable to create a registration for processor type {processorType.FullName}");
 
@@ -242,7 +242,7 @@ public class NatsMessageQueueConfiguration(
 	public NatsMessageQueueConfiguration AddProcessor<TProcessor>(
 		string subject,
 		string queue,
-		INatsSerializerRegistry? natsSerializerRegistry = null,
+		INatsSerializerRegistry? serializerRegistry = null,
 		Func<IServiceProvider, TProcessor>? processorFactory = null)
 	{
 		var processorType = typeof(TProcessor);
@@ -251,7 +251,7 @@ public class NatsMessageQueueConfiguration(
 			processorType,
 			subject,
 			queue,
-			natsSerializerRegistry,
+			serializerRegistry,
 			processorFactory);
 
 		return this;
@@ -261,7 +261,7 @@ public class NatsMessageQueueConfiguration(
 		Type processorType,
 		string subject,
 		string queue,
-		INatsSerializerRegistry? natsSerializerRegistry = null,
+		INatsSerializerRegistry? serializerRegistry = null,
 		Delegate? processorFactory = null)
 	{
 		var typeArguments = processorType
@@ -284,7 +284,7 @@ public class NatsMessageQueueConfiguration(
 			registerName,
 			subject,
 			queue,
-			natsSerializerRegistry,
+			serializerRegistry,
 			factory)
 			?? throw new InvalidOperationException($"Unable to create a registration for processor type {processorType.FullName}");
 
@@ -295,12 +295,12 @@ public class NatsMessageQueueConfiguration(
 
 	public NatsMessageQueueConfiguration AddReplyHandler<THandler>(
 		string subject,
-		INatsSerializerRegistry? natsSerializerRegistry = null,
+		INatsSerializerRegistry? serializerRegistry = null,
 		Func<IServiceProvider, THandler>? handlerFactory = null)
 	{
 		var handlerType = typeof(THandler);
 
-		AddReplyHandler(handlerType, subject, natsSerializerRegistry, handlerFactory);
+		AddReplyHandler(handlerType, subject, serializerRegistry, handlerFactory);
 
 		return this;
 	}
@@ -308,7 +308,7 @@ public class NatsMessageQueueConfiguration(
 	public NatsMessageQueueConfiguration AddReplyHandler(
 		Type handlerType,
 		string subject,
-		INatsSerializerRegistry? natsSerializerRegistry = null,
+		INatsSerializerRegistry? serializerRegistry = null,
 		Delegate? handlerFactory = null)
 	{
 		var typeArguments = handlerType
@@ -330,7 +330,7 @@ public class NatsMessageQueueConfiguration(
 			registrationType,
 			registerName,
 			subject,
-			natsSerializerRegistry,
+			serializerRegistry,
 			factory)
 			?? throw new InvalidOperationException($"Unable to create a registration for handler type {handlerType.FullName}");
 
@@ -342,7 +342,7 @@ public class NatsMessageQueueConfiguration(
 	public NatsMessageQueueConfiguration AddReplyHandler<THandler>(
 		string subject,
 		string group,
-		INatsSerializerRegistry? natsSerializerRegistry = null,
+		INatsSerializerRegistry? serializerRegistry = null,
 		Func<IServiceProvider, THandler>? handlerFactory = null)
 	{
 		var handlerType = typeof(THandler);
@@ -351,7 +351,7 @@ public class NatsMessageQueueConfiguration(
 			handlerType,
 			subject,
 			group,
-			natsSerializerRegistry,
+			serializerRegistry,
 			handlerFactory);
 
 		return this;
@@ -361,7 +361,7 @@ public class NatsMessageQueueConfiguration(
 		Type handlerType,
 		string subject,
 		string group,
-		INatsSerializerRegistry? natsSerializerRegistry = null,
+		INatsSerializerRegistry? serializerRegistry = null,
 		Delegate? handlerFactory = null)
 	{
 		var typeArguments = handlerType
@@ -384,7 +384,7 @@ public class NatsMessageQueueConfiguration(
 			registerName,
 			subject,
 			group,
-			natsSerializerRegistry,
+			serializerRegistry,
 			factory)
 			?? throw new InvalidOperationException($"Unable to create a registration for handler type {handlerType.FullName}");
 

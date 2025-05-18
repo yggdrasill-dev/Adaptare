@@ -8,7 +8,7 @@ internal class QueueSubscribeRegistration<TMessage, THandler>
 	, ISubscribeRegistration
 	where THandler : IMessageHandler<TMessage>
 {
-	private readonly INatsSerializerRegistry? m_NatsSerializerRegistry;
+	private readonly INatsSerializerRegistry? m_SerializerRegistry;
 
 	public string Queue { get; }
 
@@ -18,7 +18,7 @@ internal class QueueSubscribeRegistration<TMessage, THandler>
 		string registerName,
 		string subject,
 		string queue,
-		INatsSerializerRegistry? natsSerializerRegistry,
+		INatsSerializerRegistry? serializerRegistry,
 		Func<IServiceProvider, THandler> handlerFactory)
 		: base(registerName, handlerFactory)
 	{
@@ -27,7 +27,7 @@ internal class QueueSubscribeRegistration<TMessage, THandler>
 
 		Subject = subject;
 		Queue = queue;
-		m_NatsSerializerRegistry = natsSerializerRegistry;
+		m_SerializerRegistry = serializerRegistry;
 	}
 
 	public async ValueTask<IDisposable?> SubscribeAsync(
@@ -44,6 +44,6 @@ internal class QueueSubscribeRegistration<TMessage, THandler>
 						logger,
 						serviceProvider),
 					ct),
-				m_NatsSerializerRegistry?.GetDeserializer<TMessage>()),
+				m_SerializerRegistry?.GetDeserializer<TMessage>()),
 			cancellationToken).ConfigureAwait(false);
 }

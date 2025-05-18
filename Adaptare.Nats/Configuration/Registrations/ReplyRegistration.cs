@@ -8,21 +8,21 @@ internal class ReplyRegistration<TMessage, THandler>
 	, ISubscribeRegistration
 	where THandler : IMessageHandler<TMessage>
 {
-	private readonly INatsSerializerRegistry? m_NatsSerializerRegistry;
+	private readonly INatsSerializerRegistry? m_SerializerRegistry;
 
 	public override string Subject { get; }
 
 	public ReplyRegistration(
 		string registerName,
 		string subject,
-		INatsSerializerRegistry? natsSerializerRegistry,
+		INatsSerializerRegistry? serializerRegistry,
 		Func<IServiceProvider, THandler> handlerFactory)
 		: base(registerName, handlerFactory)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(subject, nameof(subject));
 
 		Subject = subject;
-		m_NatsSerializerRegistry = natsSerializerRegistry;
+		m_SerializerRegistry = serializerRegistry;
 	}
 
 	public async ValueTask<IDisposable?> SubscribeAsync(
@@ -39,6 +39,6 @@ internal class ReplyRegistration<TMessage, THandler>
 						logger,
 						serviceProvider),
 					ct),
-				m_NatsSerializerRegistry?.GetDeserializer<TMessage>()),
+				m_SerializerRegistry?.GetDeserializer<TMessage>()),
 			cancellationToken).ConfigureAwait(false);
 }

@@ -14,7 +14,7 @@ internal class SubscribeRegistration<TMessage, THandler> : ISubscribeRegistratio
 	private readonly string m_RegisterName;
 	private readonly bool m_AutoAck;
 	private readonly CreateChannelOptions? m_CreateChannelOptions;
-	private readonly IRabbitMQSerializerRegistry? m_RabbitMQSerializerRegistry;
+	private readonly IRabbitMQSerializerRegistry? m_SerializerRegistry;
 	private readonly Func<IServiceProvider, THandler> m_HandlerFactory;
 
 	public string Subject { get; }
@@ -24,7 +24,7 @@ internal class SubscribeRegistration<TMessage, THandler> : ISubscribeRegistratio
 		string subject,
 		bool autoAck,
 		CreateChannelOptions? createChannelOptions,
-		IRabbitMQSerializerRegistry? rabbitMQSerializerRegistry,
+		IRabbitMQSerializerRegistry? serializerRegistry,
 		Func<IServiceProvider, THandler> handlerFactory)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(subject, nameof(subject));
@@ -32,7 +32,7 @@ internal class SubscribeRegistration<TMessage, THandler> : ISubscribeRegistratio
 		Subject = subject;
 		m_AutoAck = autoAck;
 		m_CreateChannelOptions = createChannelOptions;
-		m_RabbitMQSerializerRegistry = rabbitMQSerializerRegistry;
+		m_SerializerRegistry = serializerRegistry;
 		m_HandlerFactory = handlerFactory ?? throw new ArgumentNullException(nameof(handlerFactory));
 	}
 
@@ -90,7 +90,7 @@ internal class SubscribeRegistration<TMessage, THandler> : ISubscribeRegistratio
 			await using (scope.ConfigureAwait(continueOnCapturedContext: false))
 			{
 				var handler = m_HandlerFactory(scope.ServiceProvider);
-				var serializeRegistration = m_RabbitMQSerializerRegistry
+				var serializeRegistration = m_SerializerRegistry
 					?? scope.ServiceProvider.GetRequiredKeyedService<IRabbitMQSerializerRegistry>(m_RegisterName);
 				var deserializer = serializeRegistration.GetDeserializer<TMessage>();
 
