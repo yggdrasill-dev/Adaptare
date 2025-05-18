@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/方案項目/">
+    <File Path=".editorconfig" />
+    <File Path="LICENSE.txt" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="Adaptare.Direct.UnitTests/Adaptare.Direct.UnitTests.csproj" />
+  <Project Path="Adaptare.Direct/Adaptare.Direct.csproj" />
+  <Project Path="Adaptare.Nats.UnitTests/Adaptare.Nats.UnitTests.csproj" />
+  <Project Path="Adaptare.Nats/Adaptare.Nats.csproj" />
+  <Project Path="Adaptare.RabbitMQ.UnitTests/Adaptare.RabbitMQ.UnitTests.csproj" />
+  <Project Path="Adaptare.RabbitMQ/Adaptare.RabbitMQ.csproj" />
+  <Project Path="Adaptare.UnitTests/Adaptare.UnitTests.csproj" />
+  <Project Path="Adaptare/Adaptare.csproj" />
+</Solution>
