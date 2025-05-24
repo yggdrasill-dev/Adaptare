@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using RabbitMQ.Client;
 
 namespace Adaptare.RabbitMQ;
@@ -107,7 +108,7 @@ internal class RabbitMessageSender(
 		{
 			Headers = header.ToDictionary(
 				v => v.Name,
-				v => (object?)v.Value)
+				v => (object?)Encoding.UTF8.GetBytes(v.Value ?? string.Empty))
 		};
 
 		return properties;
