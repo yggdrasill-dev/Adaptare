@@ -14,19 +14,7 @@ internal abstract class BaseRegistration<TMessage, THandler>
 		CancellationToken cancellationToken)
 	{
 		using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-		using var activity = TraceContextPropagator.TryExtract(
-			dataInfo.Msg.Headers,
-			(header, key) => (header?[key] ?? string.Empty)!,
-			out var context)
-			? NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
-				Subject,
-				ActivityKind.Consumer,
-				context,
-				tags: [
-					new KeyValuePair<string, object?>("mq", "NATS"),
-					new KeyValuePair<string, object?>("handler", typeof(THandler).Name)
-				])
-			: NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
+		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
 				ActivityKind.Consumer,
 				name: Subject,
 				tags: [
