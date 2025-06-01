@@ -18,6 +18,12 @@ internal record NatsSubscriptionSettings<TMessage>(
 				serializer: Deserializer,
 				cancellationToken: token).ConfigureAwait(false))
 			{
+				using var activity = msg.StartActivity(
+					name: $"Handle {Subject}",
+					tags: [
+						new KeyValuePair<string, object?>("mq", "NATS")
+					]);
+
 				if (EventHandler is not null)
 					await EventHandler(msg, token).ConfigureAwait(false);
 			}

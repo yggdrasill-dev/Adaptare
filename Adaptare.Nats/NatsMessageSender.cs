@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using Adaptare.Nats.Configuration;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
 namespace Adaptare.Nats;
@@ -20,20 +18,7 @@ internal class NatsMessageSender(
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken)
 	{
-		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
-			$"Nats Publish",
-			ActivityKind.Producer);
-
 		var appendHeaders = new List<MessageHeaderValue>(header);
-
-		TraceContextPropagator.Inject(
-			activity,
-			appendHeaders,
-			(headers, key, value) =>
-			{
-				if (!string.IsNullOrEmpty(value) && !headers.Any(header => header.Name == key))
-					headers.Add(new MessageHeaderValue(key, value));
-			});
 
 		var msg = new NatsMsg<TMessage>
 		{
@@ -57,20 +42,7 @@ internal class NatsMessageSender(
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken)
 	{
-		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
-			$"Nats Request",
-			ActivityKind.Producer);
-
 		var appendHeaders = new List<MessageHeaderValue>(header);
-
-		TraceContextPropagator.Inject(
-			activity,
-			appendHeaders,
-			(headers, key, value) =>
-			{
-				if (!string.IsNullOrEmpty(value) && !headers.Any(header => header.Name == key))
-					headers.Add(new MessageHeaderValue(key, value));
-			});
 
 		var headers = MakeMsgHeader(appendHeaders);
 
@@ -101,20 +73,7 @@ internal class NatsMessageSender(
 		IEnumerable<MessageHeaderValue> header,
 		CancellationToken cancellationToken)
 	{
-		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
-			$"Nats Send",
-			ActivityKind.Producer);
-
 		var appendHeaders = new List<MessageHeaderValue>(header);
-
-		TraceContextPropagator.Inject(
-			activity,
-			appendHeaders,
-			(headers, key, value) =>
-			{
-				if (!string.IsNullOrEmpty(value) && !headers.Any(header => header.Name == key))
-					headers.Add(new MessageHeaderValue(key, value));
-			});
 
 		var headers = MakeMsgHeader(appendHeaders);
 

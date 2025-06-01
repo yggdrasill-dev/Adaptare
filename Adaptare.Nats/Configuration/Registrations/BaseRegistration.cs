@@ -14,13 +14,8 @@ internal abstract class BaseRegistration<TMessage, THandler>
 		CancellationToken cancellationToken)
 	{
 		using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
-				ActivityKind.Consumer,
-				name: Subject,
-				tags: [
-					new KeyValuePair<string, object?>("mq", "NATS"),
-					new KeyValuePair<string, object?>("handler", typeof(THandler).Name)
-				]);
+
+		Activity.Current?.AddTag("handler", typeof(THandler).Name);
 
 		try
 		{
@@ -35,7 +30,8 @@ internal abstract class BaseRegistration<TMessage, THandler>
 		}
 		catch (Exception ex)
 		{
-			_ = (activity?.AddTag("error", true));
+			Activity.Current?.AddTag("error", true);
+
 			dataInfo.Logger.LogError(ex, "Handle {Subject} occur error.", Subject);
 		}
 	}

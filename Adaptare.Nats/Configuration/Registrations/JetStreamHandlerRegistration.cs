@@ -58,12 +58,12 @@ internal class JetStreamHandlerRegistration<TMessage, THandler> : ISubscribeRegi
 	{
 		using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 		using var activity = NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
-				ActivityKind.Server,
-				name: Subject,
-				tags: [
-					new KeyValuePair<string, object?>("mq", "NATS"),
-					new KeyValuePair<string, object?>("handler", typeof(THandler).Name)
-				]);
+			ActivityKind.Server,
+			name: Subject,
+			tags: [
+				new KeyValuePair<string, object?>("mq", "NATS"),
+				new KeyValuePair<string, object?>("handler", typeof(THandler).Name)
+			]);
 
 		try
 		{
