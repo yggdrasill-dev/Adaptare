@@ -1,4 +1,6 @@
-﻿using NATS.Client.Core;
+﻿using System.Diagnostics;
+using Adaptare.Nats.Configuration;
+using NATS.Client.Core;
 using NATS.Client.JetStream;
 using NATS.Client.JetStream.Models;
 
@@ -29,6 +31,26 @@ record JetStreamSubscriptionSettings<TMessage>(
 				serializer: Deserializer,
 				cancellationToken: token).ConfigureAwait(false))
 			{
+				using var activity = TraceContextPropagator.TryExtract(
+					msg.Headers,
+					(header, key) => (header?[key] ?? string.Empty)!,
+					out var context)
+					? NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
+						Subject,
+						ActivityKind.Consumer,
+						context,
+						tags: [
+							new KeyValuePair<string, object?>("mq", "NATS"),
+							new KeyValuePair<string, object?>("subscription", "JetStream"),
+						])
+					: NatsMessageQueueConfiguration._NatsActivitySource.StartActivity(
+						ActivityKind.Consumer,
+						name: Subject,
+						tags: [
+							new KeyValuePair<string, object?>("mq", "NATS"),
+							new KeyValuePair<string, object?>("subscription", "JetStream"),
+						]);
+
 				if (EventHandler is not null)
 					await EventHandler(msg, token).ConfigureAwait(false);
 			}

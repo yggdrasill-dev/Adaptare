@@ -13,6 +13,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/yggdrasill-dev/Adaptare.git</RepositoryUrl>
     <PackageTags>MessageQueue</PackageTags>
+    <RootNamespace>Adaptare</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

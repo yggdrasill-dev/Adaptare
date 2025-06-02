@@ -6,13 +6,14 @@
     <Nullable>enable</Nullable>
     <PackageId>Adaptare.Nats</PackageId>
     <Title>Adaptare.NATS</Title>
-    <Version>2.0.2</Version>
+    <Version>2.0.3</Version>
     <Authors>Phoenix</Authors>
     <Company>Valhalla</Company>
     <PackageProjectUrl>https://github.com/yggdrasill-dev/Adaptare</PackageProjectUrl>
     <RepositoryUrl>https://github.com/yggdrasill-dev/Adaptare.git</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>MessageQueue</PackageTags>
+    <RootNamespace>Adaptare.Nats</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

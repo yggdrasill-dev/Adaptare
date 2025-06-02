@@ -14,6 +14,7 @@
     <RepositoryType></RepositoryType>
     <RepositoryUrl>https://github.com/yggdrasill-dev/Adaptare.git</RepositoryUrl>
     <PackageTags>MessageQueue</PackageTags>
+    <RootNamespace>Adaptare.RabbitMQ</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

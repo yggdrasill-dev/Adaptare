@@ -27,15 +27,6 @@ internal class JetStreamMessageSender(
 
 		var appendHeaders = new List<MessageHeaderValue>(header);
 
-		TraceContextPropagator.Inject(
-			activity,
-			appendHeaders,
-			(headers, key, value) =>
-			{
-				if (!string.IsNullOrEmpty(value) && !headers.Any(header => header.Name == key))
-					headers.Add(new MessageHeaderValue(key, value));
-			});
-
 		var ack = natsSerializerRegistry is null
 			? await m_NatsJSContext.PublishAsync(
 				subject,
