@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <PackageId>Adaptare.RabbitMQ</PackageId>
     <Title>Adaptare.RabbitMQ</Title>
-    <Version>2.0.2</Version>
+    <Version>2.0.3</Version>
     <Authors>Phoenix</Authors>
     <Company>Valhalla</Company>
     <PackageProjectUrl>https://github.com/yggdrasill-dev/Adaptare</PackageProjectUrl>
@@ -15,6 +15,7 @@
     <RepositoryUrl>https://github.com/yggdrasill-dev/Adaptare.git</RepositoryUrl>
     <PackageTags>MessageQueue</PackageTags>
     <RootNamespace>Adaptare.RabbitMQ</RootNamespace>
+    <Description>Adaptare is a library developed to abstract the sending, receiving, and processing of message transmission.</Description>
   </PropertyGroup>
 
   <ItemGroup>

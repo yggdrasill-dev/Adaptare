@@ -33,8 +33,9 @@ public class TaskResource<TResource>(Task<TResource> resourcePromise)
 			}
 		}
 		catch (TaskCanceledException)
-		{
-		}
+		{ }
+		catch (OperationCanceledException)
+		{ }
 
 		GC.SuppressFinalize(this);
 	}
