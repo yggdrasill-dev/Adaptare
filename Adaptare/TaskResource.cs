@@ -21,13 +21,19 @@ public class TaskResource<TResource>(Task<TResource> resourcePromise)
 
 	public async ValueTask DisposeAsync()
 	{
-		var result = await resourcePromise.ConfigureAwait(continueOnCapturedContext: false);
-
-		if (result is IAsyncDisposable asyncDisposable)
-			await asyncDisposable.DisposeAsync().ConfigureAwait(continueOnCapturedContext: false);
-		else if (result is IDisposable disposable)
+		try
 		{
-			disposable.Dispose();
+			var result = await resourcePromise.ConfigureAwait(continueOnCapturedContext: false);
+
+			if (result is IAsyncDisposable asyncDisposable)
+				await asyncDisposable.DisposeAsync().ConfigureAwait(continueOnCapturedContext: false);
+			else if (result is IDisposable disposable)
+			{
+				disposable.Dispose();
+			}
+		}
+		catch (TaskCanceledException)
+		{
 		}
 
 		GC.SuppressFinalize(this);
