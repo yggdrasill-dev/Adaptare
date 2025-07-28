@@ -22,6 +22,8 @@ internal class RabbitMQConnectionManager(
 	private bool m_DisposedValue;
 	private IChannel? m_DeclareChannel;
 
+	public string? AppId => rabbitMQConnectionOptions.AppId;
+
 	public async Task<IConnection> GetConnectionAsync(CancellationToken cancellationToken = default)
 	{
 		await m_InitializationCompletionSource.Task.ConfigureAwait(false);

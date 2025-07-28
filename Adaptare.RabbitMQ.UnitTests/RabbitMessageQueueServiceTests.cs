@@ -13,6 +13,7 @@ public class RabbitMessageQueueServiceTests
 
         var sut = new RabbitMessageSender(
             "test",
+            "testApp",
             fakeChannel,
             RabbitMQSerializerRegistry.Default);
 

@@ -6,6 +6,7 @@ namespace Adaptare.RabbitMQ;
 
 internal class RabbitMessageSender(
 	string exchangeName,
+	string? appId,
 	IChannel channel,
 	IRabbitMQSerializerRegistry serializerRegistry)
 	: IMessageSender
@@ -102,13 +103,14 @@ internal class RabbitMessageSender(
 		}
 	}
 
-	private static BasicProperties BuildBasicProperties(IEnumerable<MessageHeaderValue> header)
+	private BasicProperties BuildBasicProperties(IEnumerable<MessageHeaderValue> header)
 	{
 		var properties = new BasicProperties
 		{
 			Headers = header.ToDictionary(
 				v => v.Name,
-				v => (object?)Encoding.UTF8.GetBytes(v.Value ?? string.Empty))
+				v => (object?)Encoding.UTF8.GetBytes(v.Value ?? string.Empty)),
+			AppId = appId
 		};
 
 		return properties;

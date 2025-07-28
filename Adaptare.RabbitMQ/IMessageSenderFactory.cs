@@ -8,5 +8,6 @@ internal interface IMessageSenderFactory
 		IServiceProvider serviceProvider,
 		string exchangeName,
 		IChannel channel,
-		IRabbitMQSerializerRegistry rabbitMQSerializerRegistry);
+		IRabbitMQSerializerRegistry rabbitMQSerializerRegistry,
+		string? appId = null);
 }

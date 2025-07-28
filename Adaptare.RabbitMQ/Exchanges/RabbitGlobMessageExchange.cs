@@ -55,7 +55,8 @@ internal class RabbitGlobMessageExchange
 					serviceProvider,
 					m_ExchangeName,
 					await connection.CreateChannelAsync(m_CreateChannelOptions, cancellationToken).ConfigureAwait(false),
-					serializerRegistry);
+					serializerRegistry,
+					connectionManager.AppId);
 
 			if (!m_MessageSenders.TryAdd(subject, sender))
 			{
