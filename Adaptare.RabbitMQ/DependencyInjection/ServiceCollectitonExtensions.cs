@@ -3,7 +3,6 @@ using Adaptare.Configuration;
 using Adaptare.RabbitMQ;
 using Adaptare.RabbitMQ.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -14,7 +13,10 @@ public static class ServiceCollectitonExtensions
 	{
 		foreach (var desc in services.Where(
 			desc => desc.ServiceType == typeof(IMessageQueueBackgroundRegistration)
-				&& desc.ImplementationType == typeof(RabbitMQBackgroundRegistration)).ToArray())
+				&& (
+					desc.ImplementationType == typeof(RabbitMQBackgroundRegistration)
+					|| desc.ImplementationInstance is RabbitMQBackgroundRegistration
+					|| desc.ImplementationFactory?.Method.ReturnType == typeof(RabbitMQBackgroundRegistration))).ToArray())
 			_ = services.Remove(desc);
 
 		return services

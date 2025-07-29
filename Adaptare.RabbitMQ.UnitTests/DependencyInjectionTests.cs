@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Adaptare.RabbitMQ.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
-using Adaptare.RabbitMQ.UnitTests;
-using Adaptare.RabbitMQ.Configuration;
+using Xunit;
 
 namespace Adaptare.RabbitMQ.UnitTests;
 
@@ -45,5 +45,30 @@ public partial class DependencyInjectionTests
         sut.AddMessageQueue()
             .AddRabbitMessageQueue(configure => configure
                 .AddHandler(typeof(StubMessageHandler), "queueName"));
+    }
+
+    [Fact]
+    public void 註冊FakeRabbitMessageQueue()
+    {
+        // Arrange
+        var sut = new ServiceCollection();
+
+        sut.AddMessageQueue()
+            .AddRabbitMessageQueue(configure => configure
+                .ConfigureConnection(
+                    sp => new RabbitMQConnectionOptions
+                    {
+                        ConnectionPromise = Task.FromResult(Substitute.For<IConnection>())
+                    }))
+            .Services
+            .AddFakeRabbitMessageQueue();
+
+        // Act
+        var finds = sut
+            .Where(desc => desc.ServiceType == typeof(IMessageQueueBackgroundRegistration))
+            .ToArray();
+
+        // Assert
+        Assert.Empty(finds);
     }
 }

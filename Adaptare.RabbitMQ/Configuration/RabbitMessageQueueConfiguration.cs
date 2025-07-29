@@ -20,10 +20,11 @@ public class RabbitMessageQueueConfiguration
 		Services = coreConfiguration.Services;
 		m_RegisterName = registerName;
 		Services.TryAddKeyedSingleton<IRabbitMQSerializerRegistry>(m_RegisterName, RabbitMQSerializerRegistry.Default);
-		Services.AddSingleton<IMessageQueueBackgroundRegistration>(sp => ActivatorUtilities.CreateInstance<RabbitMQBackgroundRegistration>(
-			sp,
-			sp.GetKeyedServices<ISubscribeRegistration>(m_RegisterName),
-			sp.GetRequiredKeyedService<RabbitMQConnectionManager>(m_RegisterName)));
+		Services.AddSingleton<IMessageQueueBackgroundRegistration, RabbitMQBackgroundRegistration>(
+			sp => ActivatorUtilities.CreateInstance<RabbitMQBackgroundRegistration>(
+				sp,
+				sp.GetKeyedServices<ISubscribeRegistration>(m_RegisterName),
+				sp.GetRequiredKeyedService<RabbitMQConnectionManager>(m_RegisterName)));
 	}
 
 	public RabbitMessageQueueConfiguration ConfigureConnection(
