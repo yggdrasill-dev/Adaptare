@@ -106,6 +106,69 @@ public class RabbitMessageQueueConfiguration
 		return this;
 	}
 
+	public RabbitMessageQueueConfiguration AddAcknowledgeHandler<THandler>(
+		string queueName,
+		AcknowledgeOptions? acknowledgeOptions = null,
+		CreateChannelOptions? createChannelOptions = null,
+		IRabbitMQSerializerRegistry? serializerRegistry = null,
+		Func<IServiceProvider, THandler>? handlerFactory = null)
+	{
+		var handlerType = typeof(THandler);
+
+		AddAcknowledgeHandler(
+			handlerType,
+			queueName,
+			acknowledgeOptions,
+			createChannelOptions,
+			serializerRegistry,
+			handlerFactory);
+
+		return this;
+	}
+
+	public RabbitMessageQueueConfiguration AddAcknowledgeHandler(
+		Type handlerType,
+		string queueName,
+		AcknowledgeOptions? acknowledgeOptions = null,
+		CreateChannelOptions? createChannelOptions = null,
+		IRabbitMQSerializerRegistry? serializerRegistry = null,
+		Delegate? handlerFactory = null)
+	{
+		var typeArguments = handlerType
+			.GetInterfaces()
+			.Where(t => t.GetGenericTypeDefinition() == typeof(IAcknowledgeMessageHandler<>))
+			.Take(1)
+			.SelectMany(t => t.GetGenericArguments())
+			.Append(handlerType)
+			.ToArray();
+
+		var factory = handlerFactory
+			?? typeof(DefaultHandlerFactory<>)
+				.MakeGenericType(handlerType)
+				.GetField("Default")!
+				.GetValue(null);
+
+		var registrationType = typeof(AcknowledgeSubscribeRegistration<,>).MakeGenericType(typeArguments);
+		var registration = (ISubscribeRegistration?)Activator.CreateInstance(
+			registrationType,
+			m_RegisterName,
+			queueName,
+			acknowledgeOptions ?? new AcknowledgeOptions
+			{
+				Multiple = false,
+				NackRequeue = false
+			},
+			createChannelOptions,
+			serializerRegistry,
+			factory)
+			?? throw new InvalidOperationException(
+				$"Unable to create registration for handler type {handlerType.FullName}");
+
+		_ = Services.AddKeyedSingleton(m_RegisterName, registration);
+
+		return this;
+	}
+
 	public RabbitMessageQueueConfiguration HandleRabbitMessageException(Func<Exception, CancellationToken, Task> handleException)
 	{
 		_ = Services.AddKeyedSingleton(
