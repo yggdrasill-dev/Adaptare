@@ -2,7 +2,6 @@
 using Adaptare.RabbitMQ.Configuration;
 using DotNet.Globbing;
 using Microsoft.Extensions.DependencyInjection;
-using RabbitMQ.Client;
 
 namespace Adaptare.RabbitMQ.Exchanges;
 
@@ -52,6 +51,9 @@ internal class RabbitGlobMessageExchange
 			return messageSender;
 		else
 		{
+			var options = m_SenderOptions.Clone();
+			options.AppId ??= connectionManager.AppId;
+
 			var sender = messageSenderFactory.CreateMessageSender(
 					serviceProvider,
 					m_ExchangeName,
@@ -59,7 +61,7 @@ internal class RabbitGlobMessageExchange
 						m_SenderOptions.CreateChannelOptions,
 						cancellationToken).ConfigureAwait(false),
 					serializerRegistry,
-					m_SenderOptions);
+					options);
 
 			if (!m_MessageSenders.TryAdd(subject, sender))
 			{
