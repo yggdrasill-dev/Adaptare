@@ -1,14 +1,15 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using Adaptare.RabbitMQ.Configuration;
 using RabbitMQ.Client;
 
 namespace Adaptare.RabbitMQ;
 
 internal class RabbitMessageSender(
 	string exchangeName,
-	string? appId,
 	IChannel channel,
-	IRabbitMQSerializerRegistry serializerRegistry)
+	IRabbitMQSerializerRegistry serializerRegistry,
+	RabbitMQSenderOptions senderOptions)
 	: IMessageSender
 	, IDisposable
 	, IAsyncDisposable
@@ -44,7 +45,7 @@ internal class RabbitMessageSender(
 		await channel.BasicPublishAsync(
 			exchangeName,
 			subject,
-			false,
+			senderOptions.Mandatory,
 			properties,
 			binaryData,
 			cancellationToken).ConfigureAwait(false);
@@ -110,7 +111,7 @@ internal class RabbitMessageSender(
 			Headers = header.ToDictionary(
 				v => v.Name,
 				v => (object?)Encoding.UTF8.GetBytes(v.Value ?? string.Empty)),
-			AppId = appId
+			AppId = senderOptions.AppId
 		};
 
 		return properties;

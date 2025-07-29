@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Adaptare.RabbitMQ.Configuration;
 using RabbitMQ.Client;
 
 namespace Adaptare.RabbitMQ.UnitTests;
@@ -13,9 +14,9 @@ public class RabbitMessageQueueServiceTests
 
         var sut = new RabbitMessageSender(
             "test",
-            "testApp",
             fakeChannel,
-            RabbitMQSerializerRegistry.Default);
+            RabbitMQSerializerRegistry.Default,
+            new RabbitMQSenderOptions());
 
         var data = Encoding.UTF8.GetBytes("aaa");
 

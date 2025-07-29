@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using Adaptare.RabbitMQ.Configuration;
+using RabbitMQ.Client;
 
 namespace Adaptare.RabbitMQ;
 
@@ -9,6 +10,6 @@ internal class NoopMessageSenderFactory : IMessageSenderFactory
 		string exchangeName,
 		IChannel channel,
 		IRabbitMQSerializerRegistry rabbitMQSerializerRegistry,
-		string? appId)
+		RabbitMQSenderOptions senderOptions)
 		=> new NoopMessageSender();
 }

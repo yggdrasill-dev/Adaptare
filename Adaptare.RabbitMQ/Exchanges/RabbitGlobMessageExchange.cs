@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using Adaptare.RabbitMQ.Configuration;
 using DotNet.Globbing;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
@@ -12,7 +13,7 @@ internal class RabbitGlobMessageExchange
 {
 	private readonly string m_RegisterName;
 	private readonly string m_ExchangeName;
-	private readonly CreateChannelOptions? m_CreateChannelOptions;
+	private readonly RabbitMQSenderOptions m_SenderOptions;
 	private readonly IRabbitMQSerializerRegistry? m_SerializerRegistry;
 	private readonly Glob m_Glob;
 	private readonly ConcurrentDictionary<string, IMessageSender> m_MessageSenders = [];
@@ -22,7 +23,7 @@ internal class RabbitGlobMessageExchange
 		string registerName,
 		string pattern,
 		string exchangeName,
-		CreateChannelOptions? createChannelOptions,
+		RabbitMQSenderOptions? senderOptions,
 		IRabbitMQSerializerRegistry? serializerRegistry)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(exchangeName, nameof(exchangeName));
@@ -30,7 +31,7 @@ internal class RabbitGlobMessageExchange
 		m_Glob = Glob.Parse(pattern);
 		m_RegisterName = registerName;
 		m_ExchangeName = exchangeName;
-		m_CreateChannelOptions = createChannelOptions;
+		m_SenderOptions = senderOptions ?? new RabbitMQSenderOptions();
 		m_SerializerRegistry = serializerRegistry;
 	}
 
@@ -54,9 +55,11 @@ internal class RabbitGlobMessageExchange
 			var sender = messageSenderFactory.CreateMessageSender(
 					serviceProvider,
 					m_ExchangeName,
-					await connection.CreateChannelAsync(m_CreateChannelOptions, cancellationToken).ConfigureAwait(false),
+					await connection.CreateChannelAsync(
+						m_SenderOptions.CreateChannelOptions,
+						cancellationToken).ConfigureAwait(false),
 					serializerRegistry,
-					connectionManager.AppId);
+					m_SenderOptions);
 
 			if (!m_MessageSenders.TryAdd(subject, sender))
 			{

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Adaptare.RabbitMQ.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
 namespace Adaptare.RabbitMQ;
@@ -10,11 +11,11 @@ internal class RabbitMessageSenderFactory : IMessageSenderFactory
 		string exchangeName,
 		IChannel channel,
 		IRabbitMQSerializerRegistry serializerRegistry,
-		string? appId = null)
+		RabbitMQSenderOptions senderOptions)
 		=> ActivatorUtilities.CreateInstance<RabbitMessageSender>(
 			serviceProvider,
 			exchangeName,
-			appId!,
 			channel,
-			serializerRegistry);
+			serializerRegistry,
+			senderOptions);
 }

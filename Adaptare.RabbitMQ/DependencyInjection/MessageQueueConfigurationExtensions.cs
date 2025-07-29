@@ -1,5 +1,6 @@
 ﻿using Adaptare.Configuration;
 using Adaptare.RabbitMQ;
+using Adaptare.RabbitMQ.Configuration;
 using Adaptare.RabbitMQ.Exchanges;
 using RabbitMQ.Client;
 
@@ -11,14 +12,14 @@ public static class MessageQueueConfigurationExtensions
 		this MessageQueueConfiguration configuration,
 		string glob,
 		string exchangeName,
-		CreateChannelOptions? createChannelOptions = null,
+		RabbitMQSenderOptions? senderOptions = null,
 		IRabbitMQSerializerRegistry? serializerRegistry = null)
 		=> AddRabbitGlobPatternExchange(
 			configuration,
 			string.Empty,
 			glob,
 			exchangeName,
-			createChannelOptions,
+			senderOptions,
 			serializerRegistry);
 
 	public static MessageQueueConfiguration AddRabbitGlobPatternExchange(
@@ -26,12 +27,12 @@ public static class MessageQueueConfigurationExtensions
 		string registerName,
 		string glob,
 		string exchangeName,
-		CreateChannelOptions? createChannelOptions = null,
+		RabbitMQSenderOptions? senderOptions = null,
 		IRabbitMQSerializerRegistry? serializerRegistry = null)
 		=> configuration.AddExchange(new RabbitGlobMessageExchange(
 			registerName,
 			glob,
 			exchangeName,
-			createChannelOptions,
+			senderOptions,
 			serializerRegistry));
 }

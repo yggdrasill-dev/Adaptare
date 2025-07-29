@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using Adaptare.RabbitMQ.Configuration;
+using RabbitMQ.Client;
 
 namespace Adaptare.RabbitMQ;
 
@@ -9,5 +10,5 @@ internal interface IMessageSenderFactory
 		string exchangeName,
 		IChannel channel,
 		IRabbitMQSerializerRegistry rabbitMQSerializerRegistry,
-		string? appId = null);
+		RabbitMQSenderOptions senderOptions);
 }
