@@ -19,10 +19,10 @@ internal class RabbitMQAcknowledgeMessage<TMessage>(
 		=> channel.BasicAckAsync(deliveryTag, options.Multiple, cancellationToken);
 
 	public ValueTask AckProgressAsync(CancellationToken cancellationToken = default)
-		=> throw new NotImplementedException();
+		=> throw new NotSupportedException();
 
 	public ValueTask AckTerminateAsync(CancellationToken cancellationToken = default)
-		=> throw new NotImplementedException();
+		=> throw new NotSupportedException();
 
 	public ValueTask NakAsync(TimeSpan delay = default, CancellationToken cancellationToken = default)
 		=> channel.BasicNackAsync(
