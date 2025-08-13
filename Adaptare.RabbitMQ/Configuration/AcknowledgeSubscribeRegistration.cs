@@ -53,7 +53,8 @@ internal class AcknowledgeSubscribeRegistration<TMessage, THandler> : ISubscribe
 					Logger = logger,
 					CancellationToken = cancellationToken,
 					Channel = model
-				})
+				}),
+				AutoAck = false
 			},
 			cancellationToken);
 
