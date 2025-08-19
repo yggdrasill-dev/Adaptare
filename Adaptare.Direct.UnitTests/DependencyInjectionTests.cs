@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Xunit;
 
 namespace Adaptare.Direct.UnitTests;
 
@@ -61,5 +62,29 @@ public class DependencyInjectionTests
 		sut.AddMessageQueue()
 			.AddDirectMessageQueue(config => config
 				.AddProcessor(typeof(StubMessageProcessor<string, string>), "a.b.c"));
+	}
+
+	[Fact]
+	public void DependencyInjection_註冊一個AcknowledgeMessageHandler()
+	{
+		// Arrange
+		var sut = new ServiceCollection();
+
+		// Act
+		sut.AddMessageQueue()
+			.AddDirectMessageQueue(config => config
+				.AddAcknowledgeHandler<StubAcknowledgeMessageHandler<string>>("a.b.c"));
+	}
+
+	[Fact]
+	public void DependencyInjection_以AcknowledgeMessageHandlerType註冊AcknowledgeMessageHandler()
+	{
+		// Arrange
+		var sut = new ServiceCollection();
+
+		// Act
+		sut.AddMessageQueue()
+			.AddDirectMessageQueue(config => config
+				.AddAcknowledgeHandler(typeof(StubAcknowledgeMessageHandler<string>), "a.b.c"));
 	}
 }

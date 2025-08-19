@@ -1,15 +1,21 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Adaptare.Direct.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Adaptare.Direct;
-
-internal class DirectHandlerMessageSender<TData, TMessageHandler>(
-	Func<IServiceProvider, TMessageHandler> messageHandlerFactory,
+internal class DirectAcknowledgeHandlerMessageSender<TData, TAcknowledgeHandler>(
+	Func<IServiceProvider, TAcknowledgeHandler> messageHandlerFactory,
+	DirectAcknowledgeOptions acknowledgeOptions,
 	IServiceProvider serviceProvider,
-	ILogger<DirectHandlerMessageSender<TData, TMessageHandler>> logger)
+	ILogger<DirectAcknowledgeHandlerMessageSender<TData, TAcknowledgeHandler>> logger)
 	: IMessageSender
-	where TMessageHandler : class, IMessageHandler<TData>
+	where TAcknowledgeHandler : class, IAcknowledgeMessageHandler<TData>
 {
 	public ValueTask PublishAsync<TMessage>(
 		string subject,
@@ -77,7 +83,7 @@ internal class DirectHandlerMessageSender<TData, TMessageHandler>(
 		using var activity = DirectDiagnostics.ActivitySource.StartActivity(subject, ActivityKind.Producer);
 
 		_ = (activity?.AddTag("mq", "Direct")
-			.AddTag("handler", typeof(TMessageHandler).Name));
+			.AddTag("handler", typeof(TAcknowledgeHandler).Name));
 
 		var scope = serviceProvider.CreateAsyncScope();
 		await using (scope.ConfigureAwait(false))
@@ -86,9 +92,7 @@ internal class DirectHandlerMessageSender<TData, TMessageHandler>(
 
 			if (data is TData messageData)
 				await handler.HandleAsync(
-					subject,
-					messageData,
-					headerValues,
+					new DirectAcknowledgeMessage<TData>(subject, messageData, headerValues, acknowledgeOptions),
 					cancellationToken).ConfigureAwait(false);
 			else
 				throw new InvalidCastException($"type {typeof(TMessage).Name} Can't cast type {typeof(TData).Name}");
